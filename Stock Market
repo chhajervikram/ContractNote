@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📄 Contract Note Importer · Excel & CSV</title>
+    <!-- Font Awesome & SheetJS (XLSX) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
+        body {
+            background: #f4f7fb;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 25px 25px 30px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #1e293b;
+            margin: 0 0 8px 0;
+        }
+        h1 i { color: #2563eb; }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 14px 20px;
+            border-radius: 40px;
+            margin: 18px 0 22px 0;
+            border: 1px solid #e9edf4;
+        }
+        .file-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .file-actions button {
+            background: #1e293b;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            letter-spacing: 0.3px;
+        }
+        .file-actions button:hover { background: #0f172a; transform: scale(1.01); }
+        .file-actions button:active { background: #0b1121; }
+        .file-badge {
+            background: #e9edf4;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .file-badge i { color: #2563eb; }
+        .stats {
+            font-size: 14px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-excel { background: #1d6f42; }
+        .btn-excel i { margin-right: 4px; }
+        .btn-excel:hover { background: #145a34; }
+        .btn-csv { background: #0b2b4a; }
+        .btn-csv i { margin-right: 4px; }
+        .btn-csv:hover { background: #082036; }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #e9edf4;
+            background: white;
+            margin-top: 6px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 1300px;
+        }
+        th {
+            background: #eef2f6;
+            color: #0f172a;
+            font-weight: 600;
+            padding: 14px 10px;
+            white-space: nowrap;
+            text-align: center;
+            border-bottom: 3px double #b9c4d4;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        td {
+            padding: 10px 10px;
+            border-bottom: 1px solid #eef2f6;
+            vertical-align: middle;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        td:first-child, th:first-child { padding-left: 14px; }
+        td:last-child, th:last-child { padding-right: 14px; }
+        .highlight-blue { background: #c8dcff !important; }
+        .highlight-yellow { background: #ffff96 !important; }
+        .trade-delivery { color: #0055cc; font-weight: 700; }
+        .trade-intraday { color: #cc3300; font-weight: 700; }
+        .source-file { color: #475569; font-size: 11px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+            color: #6b7a8f;
+            font-size: 15px;
+        }
+        .empty-state i { font-size: 44px; color: #b9c8dd; margin-bottom: 10px; display: block; }
+        .footer-note {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            color: #4b5b6e;
+            font-size: 13px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .footer-note i { margin-right: 5px; color: #3b82f6; }
+        .separator-row td {
+            height: 2px;
+            padding: 0;
+            border: none;
+        }
+        .separator-row-blue td { background-color: #c8dcff; }
+        .separator-row-yellow td { background-color: #ffff96; }
+        @media (max-width: 700px) {
+            .toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
+            .file-actions { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="appContainer">
+    <h1>
+        <i class="fas fa-file-contract"></i>
+        Contract Note Importer
+        <span style="font-weight:400;font-size:16px;margin-left:auto;color:#3b6b9b;" id="fileCountDisplay">📁 0 files</span>
+    </h1>
+
+    <div class="toolbar">
+        <div class="file-actions">
+            <button id="selectFilesBtn"><i class="fas fa-folder-open"></i> Select Anand Rathi.txt</button>
+            <button id="importBtn"><i class="fas fa-upload"></i> Import & preview</button>
+            <button id="exportExcelBtn" class="btn-excel"><i class="fas fa-file-excel"></i> Excel (.xlsx)</button>
+            <button id="exportCsvBtn" class="btn-csv"><i class="fas fa-file-csv"></i> CSV</button>
+            <span class="file-badge" id="selectedFileList"><i class="fas fa-file-alt"></i> No file selected</span>
+        </div>
+        <div class="stats" id="rowStats">📊 0 rows</div>
+    </div>
+
+    <div class="table-wrapper" id="tableWrapper">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>PartyCode</th><th>Exchange</th><th>Trade Date</th><th>Scrip Name</th><th>ISIN</th>
+                    <th>Sell/Buy</th><th>Trade Type</th><th>Trade Qty</th><th>Market Rate</th><th>Market Amount</th>
+                    <th>Brokerage</th><th>ClientName</th><th>Order No</th><th>TRADE_TIME</th><th>Trade No</th>
+                    <th>Terminal No / Batch ID</th><th>Contract Note No</th><th>Settlement</th><th>Broker</th>
+                    <th>Source File</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="20" class="empty-state"><i class="fas fa-inbox"></i> No data imported<br><span style="font-size:13px;">Select Anand Rathi.txt files and click "Import & preview"</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="footer-note">
+        <span><i class="fas fa-download"></i> Excel: Blue separator (new contract note) · Yellow separator (new party code)</span>
+        <span><i class="fas fa-arrows-alt-h"></i> Auto-fit columns</span>
+    </div>
+</div>
+<script>
+    (function() {
+        "use strict";
+
+        // ---------- state ----------
+        let selectedFiles = [];
+        let parsedRows = [];
+
+        // DOM refs
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.multiple = true;
+        fileInput.accept = '.txt';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        const selectBtn = document.getElementById('selectFilesBtn');
+        const importBtn = document.getElementById('importBtn');
+        const exportExcelBtn = document.getElementById('exportExcelBtn');
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        const fileBadge = document.getElementById('selectedFileList');
+        const fileCountSpan = document.getElementById('fileCountDisplay');
+        const rowStats = document.getElementById('rowStats');
+        const tbody = document.getElementById('tableBody');
+
+        // ---------- helpers ----------
+        function updateFileBadge() {
+            if (selectedFiles.length === 0) {
+                fileBadge.innerHTML = '<i class="fas fa-file-alt"></i> No file selected';
+                fileCountSpan.textContent = '📁 0 files';
+                return;
+            }
+            const names = selectedFiles.map(f => f.name).join(', ');
+            const short = names.length > 60 ? names.slice(0, 55) + '…' : names;
+            fileBadge.innerHTML = `<i class="fas fa-file-alt"></i> ${selectedFiles.length} file(s): ${short}`;
+            fileCountSpan.textContent = `📁 ${selectedFiles.length} files`;
+        }
+
+        function updateRowStats() {
+            const count = parsedRows.filter(r => !r.isSeparator).length;
+            rowStats.textContent = `📊 ${count} row${count !== 1 ? 's' : ''}`;
+        }
+
+        // ---------- parsing core (VBA logic) ----------
+        function extractClientName(text) {
+            const lines = text.split(/\r?\n/);
+            for (let i = 0; i < Math.min(lines.length, 40); i++) {
+                let line = lines[i].trim();
+                if (line.length === 0) continue;
+                const openParen = line.indexOf('(');
+                const closeParen = line.indexOf(')');
+                if (openParen > 0 && closeParen > openParen) {
+                    let candidate = line.substring(0, openParen).trim();
+                    if (isValidClientName(candidate)) return candidate;
+                }
+            }
+            return '';
+        }
+
+        function isValidClientName(name) {
+            if (name.length < 3) return false;
+            if (/^\d+$/.test(name)) return false;
+            const invalid = ['COMPLIANCE OFFICER','MR ','MRS ','MS ','AUTHORISED SIGNATOR','REGISTERED OFFICE',
+                'MEMBER CODE','SEBI','CIN:','GSTIN','PAN ','EMAIL','VISIT US','DEALING OFFICE','RECIPIENT',
+                'CONTRACT NOTE','SETTLEMENT','TRADE DATE','NO.','NORMAL','T1'];
+            for (let term of invalid) {
+                if (name.toUpperCase().includes(term)) return false;
+            }
+            if (name.indexOf(' ') === -1) return false;
+            if (/\d/.test(name)) return false;
+            return true;
+        }
+
+        function extractRegex(txt, pattern) {
+            const re = new RegExp(pattern, 'gi');
+            const m = re.exec(txt);
+            if (m && m.length > 1) return m[1].trim();
+            return '';
+        }
+
+        function findContractNote(txt) {
+            return extractRegex(txt, 'CONTRACT\\s*NOTE\\s*NO\\.?\\s*[:\\-]*\\s*([A-Za-z0-9/\\-]+)');
+        }
+
+        function findSettlement(txt) {
+            return extractRegex(txt, 'SETTLEMENT\\s*(?:NO\\.?|NUMBER)?\\s*[:\\-]*\\s*([\\dA-Za-z]+)');
+        }
+
+        function findBrokerName(txt) {
+            const lines = txt.split(/\r?\n/);
+            for (let i = 0; i < Math.min(lines.length, 40); i++) {
+                let l = lines[i].trim();
+                if (l.length === 0) continue;
+                if (/(Broker|Stock Brokers|Share and Stock|Limited)/i.test(l) && l.length < 80) {
+                    let cand = l.replace(/Recipient[:]*/gi, '').replace(/To[:]*/gi, '').replace(/FOR[:]*/gi, '').replace(/Registered Office[:]*/gi, '').trim();
+                    if (cand.length > 3 && !/http/i.test(cand)) {
+                        while (cand.endsWith(',') || cand.endsWith(':') || cand.endsWith('-')) cand = cand.slice(0, -1);
+                        return cand.trim();
+                    }
+                }
+            }
+            const regex = /([A-Za-z\.\&\-\s]{5,80}Brokers?[^\r\n]*)/i;
+            const m = regex.exec(txt);
+            if (m) return m[1].replace(/Recipient[:]*/gi, '').trim();
+            return '';
+        }
+
+        function isNumericToken(tok) {
+            let t = tok.trim();
+            if (t === '') return false;
+            t = t.replace(/,/g, '');
+            if (t.startsWith('(') && t.endsWith(')')) t = '-' + t.slice(1, -1);
+            t = t.replace(/%/g, '');
+            return !isNaN(parseFloat(t)) && isFinite(t);
+        }
+
+        function splitClean(str) {
+            return str.trim().split(/\s+/).filter(s => s.length > 0);
+        }
+
+        function parseContractNoteText(text, fileName) {
+            text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            text = text.replace(/\uFEFF/g, '').replace(/\u200B/g, '');
+
+            const lines = text.split('\n');
+            const contractNo = findContractNote(text);
+            const settlementNo = findSettlement(text);
+            const broker = findBrokerName(text);
+            const clientName = extractClientName(text);
+
+            let rows = [];
+            let pending = [];
+            let currISIN = '', tradeDate = '', partyCode = '';
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (line.length === 0) continue;
+
+                if (line.toUpperCase().includes('TRADING BACK OFFICE CODE')) {
+                    let pc = line.includes(':') ? line.split(':').slice(1).join(':').trim() : line.replace(/Trading Back office code/i, '').trim();
+                    if (pc.length > 0) partyCode = pc.split(/\s+/)[0];
+                }
+
+                if (line.toUpperCase().includes('TRADE DATE')) {
+                    let tmp = line.replace(/TRADE DATE/i, '').trim();
+                    if (tmp.toUpperCase().includes('SETTLEMENT')) tmp = tmp.substring(0, tmp.toUpperCase().indexOf('SETTLEMENT'));
+                    tradeDate = tmp.trim();
+                    if (tradeDate && !isNaN(Date.parse(tradeDate))) {
+                        const d = new Date(tradeDate);
+                        if (!isNaN(d)) tradeDate = d.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'.');
+                    }
+                }
+
+                if (line.toUpperCase().includes('ISIN:')) {
+                    currISIN = line.replace(/ISIN:/i, '').trim().split(/\s+/)[0] || '';
+                    let foundType = '';
+                    for (let j = i+1; j < Math.min(lines.length, i+10); j++) {
+                        let look = lines[j].trim().toUpperCase();
+                        if (look.includes('DELIVERY')) { foundType = 'Delivery'; break; }
+                        if (look.includes('INTRADAY')) { foundType = 'Intraday'; break; }
+                    }
+                    for (let p of pending) {
+                        let entry = [...p];
+                        if (foundType && !entry[3]) entry[3] = foundType;
+                        let row = {
+                            PartyCode: partyCode || '',
+                            Exchange: entry[0] || '',
+                            TradeDate: tradeDate || '',
+                            ScripName: entry[1] || '',
+                            ISIN: currISIN || '',
+                            SellBuy: entry[2] || '',
+                            TradeType: entry[3] || '',
+                            TradeQty: entry[4] || '',
+                            MarketRate: entry[5] || '',
+                            MarketAmount: entry[6] || '',
+                            Brokerage: entry[7] || '',
+                            ClientName: clientName || '',
+                            OrderNo: entry[8] || '',
+                            TradeTime: entry[9] || '',
+                            TradeNo: entry[10] || '',
+                            TerminalNo: entry[11] || '',
+                            ContractNote: contractNo || '',
+                            Settlement: settlementNo || '',
+                            Broker: entry[12] || broker || '',
+                            SourceFile: fileName || ''
+                        };
+                        rows.push(row);
+                    }
+                    pending = [];
+                }
+
+                const tokens = splitClean(line);
+                if (tokens.length > 0 && isNumericToken(tokens[0]) && (line.toUpperCase().includes('BUY') || line.toUpperCase().includes('SELL'))) {
+                    let bsIdx = -1;
+                    for (let k=0; k<tokens.length; k++) {
+                        if (tokens[k].toUpperCase() === 'BUY' || tokens[k].toUpperCase() === 'SELL') { bsIdx = k; break; }
+                    }
+                    if (bsIdx === -1) continue;
+
+                    const orderNo = tokens[0] || '';
+                    const terminalNo = tokens[1] || '';
+                    const tradeNo = tokens[2] || '';
+                    const tradeTime = tokens[3] || '';
+
+                    let scrip = '';
+                    for (let k=4; k<bsIdx; k++) {
+                        if (k < tokens.length) scrip = scrip ? scrip + ' ' + tokens[k] : tokens[k];
+                    }
+
+                    const buySell = tokens[bsIdx] || '';
+                    const qty = tokens[bsIdx+1] || '';
+                    const exchange = tokens[tokens.length-1] || '';
+
+                    let marketRate = '', mrIdx = -1;
+                    for (let k=bsIdx+2; k<tokens.length-1; k++) {
+                        if (isNumericToken(tokens[k])) { marketRate = tokens[k]; mrIdx = k; break; }
+                    }
+
+                    let marketAmount = '', maIdx = -1;
+                    for (let k=tokens.length-2; k>=bsIdx+2; k--) {
+                        if (isNumericToken(tokens[k])) { marketAmount = tokens[k]; maIdx = k; break; }
+                    }
+
+                    let brokerage = '';
+                    if (mrIdx > -1 && mrIdx+1 < tokens.length-1 && isNumericToken(tokens[mrIdx+1])) {
+                        if (mrIdx+1 !== maIdx) brokerage = tokens[mrIdx+1];
+                    }
+
+                    pending.push([exchange, scrip, buySell, '', qty, marketRate, marketAmount, brokerage, orderNo, tradeTime, tradeNo, terminalNo, '']);
+                }
+            }
+
+            // flush leftover
+            for (let p of pending) {
+                let entry = p;
+                let row = {
+                    PartyCode: partyCode || '',
+                    Exchange: entry[0] || '',
+                    TradeDate: tradeDate || '',
+                    ScripName: entry[1] || '',
+                    ISIN: currISIN || '',
+                    SellBuy: entry[2] || '',
+                    TradeType: entry[3] || '',
+                    TradeQty: entry[4] || '',
+                    MarketRate: entry[5] || '',
+                    MarketAmount: entry[6] || '',
+                    Brokerage: entry[7] || '',
+                    ClientName: clientName || '',
+                    OrderNo: entry[8] || '',
+                    TradeTime: entry[9] || '',
+                    TradeNo: entry[10] || '',
+                    TerminalNo: entry[11] || '',
+                    ContractNote: contractNo || '',
+                    Settlement: settlementNo || '',
+                    Broker: entry[12] || broker || '',
+                    SourceFile: fileName || ''
+                };
+                rows.push(row);
+            }
+
+            return rows;
+        }
+
+        // ---------- Process rows with VBA boundary logic ----------
+        function processWithBoundaries(rows) {
+            if (rows.length === 0) return rows;
+
+            let result = [];
+            let gLastPartyCode = '';
+            let gLastContractNote = '';
+            let gLastSettlement = '';
+            let rowCount = 5;
+
+            for (let idx = 0; idx < rows.length; idx++) {
+                const r = rows[idx];
+                
+                if (rowCount > 5) {
+                    if (r.PartyCode === gLastPartyCode) {
+                        if (r.ContractNote !== gLastContractNote || r.Settlement !== gLastSettlement) {
+                            result.push({ 
+                                isSeparator: true, 
+                                color: 'blue',
+                                PartyCode: '', Exchange: '', TradeDate: '', ScripName: '', ISIN: '',
+                                SellBuy: '', TradeType: '', TradeQty: '', MarketRate: '', MarketAmount: '',
+                                Brokerage: '', ClientName: '', OrderNo: '', TradeTime: '', TradeNo: '',
+                                TerminalNo: '', ContractNote: '', Settlement: '', Broker: '', SourceFile: ''
+                            });
+                            rowCount++;
+                        }
+                    } else {
+                        result.push({ 
+                            isSeparator: true, 
+                            color: 'yellow',
+                            PartyCode: '', Exchange: '', TradeDate: '', ScripName: '', ISIN: '',
+                            SellBuy: '', TradeType: '', TradeQty: '', MarketRate: '', MarketAmount: '',
+                            Brokerage: '', ClientName: '', OrderNo: '', TradeTime: '', TradeNo: '',
+                            TerminalNo: '', ContractNote: '', Settlement: '', Broker: '', SourceFile: ''
+                        });
+                        rowCount++;
+                    }
+                }
+
+                result.push({ ...r, isSeparator: false });
+                
+                gLastContractNote = r.ContractNote;
+                gLastSettlement = r.Settlement;
+                gLastPartyCode = r.PartyCode;
+                rowCount++;
+            }
+
+            return result;
+        }
+
+        // ---------- import ----------
+        function importFiles() {
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one .txt file.');
+                return;
+            }
+
+            const allRows = [];
+            const promises = selectedFiles.map(file => 
+                file.text().then(content => {
+                    try {
+                        const parsed = parseContractNoteText(content, file.name);
+                        allRows.push(...parsed);
+                    } catch (e) {
+                        console.warn('Parse error', file.name, e);
+                    }
+                })
+            );
+
+            Promise.all(promises).then(() => {
+                parsedRows = processWithBoundaries(allRows);
+                renderTable(parsedRows);
+                updateRowStats();
+                document.querySelector('#dataTable').style.tableLayout = 'auto';
+            }).catch(err => alert('Error reading files: ' + err.message));
+        }
+
+        // ---------- render table ----------
+        function renderTable(rows) {
+            if (rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="20" class="empty-state"><i class="fas fa-inbox"></i> No data imported<br><span style="font-size:13px;">Select Anand Rathi.txt files and click "Import & preview"</span></td></tr>`;
+                return;
+            }
+
+            let html = '';
+            for (let r of rows) {
+                if (r.isSeparator) {
+                    const colorClass = r.color === 'blue' ? 'separator-row-blue' : 'separator-row-yellow';
+                    html += `<tr class="separator-row ${colorClass}"><td colspan="20" style="height:4px;padding:0;border:none;background-color:${r.color === 'blue' ? '#c8dcff' : '#ffff96'};"></td></tr>`;
+                    continue;
+                }
+
+                let tradeTypeClass = '';
+                if (r.TradeType && r.TradeType.toUpperCase() === 'DELIVERY') tradeTypeClass = 'trade-delivery';
+                else if (r.TradeType && r.TradeType.toUpperCase() === 'INTRADAY') tradeTypeClass = 'trade-intraday';
+
+                html += `<tr>`;
+                const fields = [
+                    r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN,
+                    r.SellBuy, r.TradeType, r.TradeQty, r.MarketRate, r.MarketAmount,
+                    r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime, r.TradeNo,
+                    r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile
+                ];
+                for (let idx=0; idx<fields.length; idx++) {
+                    let val = fields[idx] || '';
+                    if (idx === 6 && tradeTypeClass) {
+                        html += `<td class="${tradeTypeClass}">${val}</td>`;
+                    } else if (idx === 19) {
+                        html += `<td class="source-file" title="${val}">${val}</td>`;
+                    } else {
+                        html += `<td>${val}</td>`;
+                    }
+                }
+                html += '</tr>';
+            }
+            tbody.innerHTML = html;
+        }
+
+        // ---------- Export to Excel (XLSX) with professional styling ----------
+        function exportToExcel() {
+            if (parsedRows.length === 0) {
+                alert('No data to export. Import files first.');
+                return;
+            }
+
+            const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
+                'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
+                'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
+
+            // Build data array
+            const data = [];
+            
+            // Add headers (row 3)
+            data.push(headers);
+            
+            // Add data rows and separators
+            for (let r of parsedRows) {
+                if (r.isSeparator) {
+                    const emptyRow = new Array(headers.length).fill('');
+                    data.push(emptyRow);
+                } else {
+                    const row = [
+                        r.PartyCode || '', r.Exchange || '', r.TradeDate || '', r.ScripName || '', r.ISIN || '', 
+                        r.SellBuy || '', r.TradeType || '', r.TradeQty || '', r.MarketRate || '', r.MarketAmount || '',
+                        r.Brokerage || '', r.ClientName || '', r.OrderNo || '', r.TradeTime || '', r.TradeNo || '',
+                        r.TerminalNo || '', r.ContractNote || '', r.Settlement || '', r.Broker || '', r.SourceFile || ''
+                    ];
+                    data.push(row);
+                }
+            }
+
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            // Insert 2 empty rows at the top
+            // We need to shift all rows down by 2
+            const wsData = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            const newData = [
+                [], // Row 1 - empty
+                [], // Row 2 - empty
+                ...wsData
+            ];
+            const wsNew = XLSX.utils.aoa_to_sheet(newData);
+
+            // Auto-fit columns
+            const colWidths = headers.map((h, colIdx) => {
+                let maxLen = h.length;
+                for (let rowIdx = 0; rowIdx < newData.length; rowIdx++) {
+                    const row = newData[rowIdx];
+                    if (row && row[colIdx]) {
+                        const val = String(row[colIdx]);
+                        maxLen = Math.max(maxLen, val.length);
+                    }
+                }
+                return { wch: Math.min(Math.max(maxLen + 4, 14), 40) };
+            });
+            wsNew['!cols'] = colWidths;
+
+            // Apply professional styling to header row (now at index 2)
+            const headerRowIdx = 2;
+            for (let col = 0; col < headers.length; col++) {
+                const cellRef = XLSX.utils.encode_cell({ r: headerRowIdx, c: col });
+                if (!wsNew[cellRef]) wsNew[cellRef] = { v: headers[col] };
+                
+                // Professional header styling
+                wsNew[cellRef].s = {
+                    font: { 
+                        bold: true, 
+                        sz: 11, 
+                        color: { rgb: "FFFFFF" },
+                        name: "Calibri"
+                    },
+                    fill: { 
+                        fgColor: { rgb: "1E293B" }  // Dark navy blue
+                    },
+                    alignment: { 
+                        horizontal: "center", 
+                        vertical: "center",
+                        wrapText: true
+                    },
+                    border: {
+                        top: { style: "thick", color: { rgb: "1E293B" } },
+                        bottom: { style: "double", color: { rgb: "1E293B" } },
+                        left: { style: "thin", color: { rgb: "4A5568" } },
+                        right: { style: "thin", color: { rgb: "4A5568" } }
+                    }
+                };
+            }
+
+            // Apply colors to separator rows and style data rows
+            let excelRowIdx = 3; // Start after header (row 0,1,2 = empty, empty, header)
+            for (let r of parsedRows) {
+                if (r.isSeparator) {
+                    const color = r.color === 'blue' ? 'C8DCFF' : 'FFFF96';
+                    for (let col = 0; col < headers.length; col++) {
+                        const cellRef = XLSX.utils.encode_cell({ r: excelRowIdx, c: col });
+                        if (!wsNew[cellRef]) {
+                            wsNew[cellRef] = { v: '' };
+                        }
+                        wsNew[cellRef].s = {
+                            fill: { fgColor: { rgb: color } },
+                            alignment: { horizontal: "center", vertical: "center" }
+                        };
+                    }
+                } else {
+                    // Style data rows with thin borders and alternating row colors
+                    const rowColor = excelRowIdx % 2 === 0 ? 'F8FAFC' : 'FFFFFF';
+                    for (let col = 0; col < headers.length; col++) {
+                        const cellRef = XLSX.utils.encode_cell({ r: excelRowIdx, c: col });
+                        if (wsNew[cellRef]) {
+                            wsNew[cellRef].s = {
+                                fill: { fgColor: { rgb: rowColor } },
+                                border: {
+                                    top: { style: "thin", color: { rgb: "E2E8F0" } },
+                                    bottom: { style: "thin", color: { rgb: "E2E8F0" } },
+                                    left: { style: "thin", color: { rgb: "E2E8F0" } },
+                                    right: { style: "thin", color: { rgb: "E2E8F0" } }
+                                },
+                                alignment: { 
+                                    vertical: "center", 
+                                    horizontal: "left",
+                                    indent: 1
+                                },
+                                font: { name: "Calibri", sz: 10 }
+                            };
+                            
+                            // Special formatting for Trade Type column
+                            if (col === 6 && wsNew[cellRef].v) {
+                                const val = String(wsNew[cellRef].v).toUpperCase();
+                                if (val === 'DELIVERY') {
+                                    wsNew[cellRef].s.font.color = { rgb: "0055CC" };
+                                    wsNew[cellRef].s.font.bold = true;
+                                } else if (val === 'INTRADAY') {
+                                    wsNew[cellRef].s.font.color = { rgb: "CC3300" };
+                                    wsNew[cellRef].s.font.bold = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                excelRowIdx++;
+            }
+
+            // Add freeze pane (freeze header row at row 3)
+            wsNew['!freeze'] = { xSplit: 0, ySplit: 3 };
+
+            XLSX.utils.book_append_sheet(wb, wsNew, 'ContractNotes');
+            const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'-');
+            XLSX.writeFile(wb, `Equity_Contract_Note_${dateStr}.xlsx`);
+        }
+
+        // ---------- Export CSV (headers at row 3) ----------
+        function exportCsv() {
+            if (parsedRows.length === 0) {
+                alert('No data to export. Import files first.');
+                return;
+            }
+
+            const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
+                'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
+                'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
+
+            let csv = '';
+            
+            // Row 1 - empty
+            csv += new Array(headers.length).fill('').join(',') + '\n';
+            // Row 2 - empty
+            csv += new Array(headers.length).fill('').join(',') + '\n';
+            // Row 3 - headers
+            csv += headers.join(',') + '\n';
+            
+            // Data rows with blank separator rows
+            for (let r of parsedRows) {
+                if (r.isSeparator) {
+                    // Add a blank row
+                    csv += new Array(headers.length).fill('').join(',') + '\n';
+                } else {
+                    const row = [
+                        r.PartyCode || '', r.Exchange || '', r.TradeDate || '', r.ScripName || '', r.ISIN || '', 
+                        r.SellBuy || '', r.TradeType || '', r.TradeQty || '', r.MarketRate || '', r.MarketAmount || '',
+                        r.Brokerage || '', r.ClientName || '', r.OrderNo || '', r.TradeTime || '', r.TradeNo || '',
+                        r.TerminalNo || '', r.ContractNote || '', r.Settlement || '', r.Broker || '', r.SourceFile || ''
+                    ];
+                    csv += row.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(',') + '\n';
+                }
+            }
+
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'-');
+            a.download = `Equity_Contract_Note_${dateStr}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ---------- event binding ----------
+        selectBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length) {
+                selectedFiles = Array.from(files);
+                updateFileBadge();
+            }
+            fileInput.value = '';
+        });
+
+        importBtn.addEventListener('click', importFiles);
+        exportExcelBtn.addEventListener('click', exportToExcel);
+        exportCsvBtn.addEventListener('click', exportCsv);
+
+        // init
+        updateFileBadge();
+        updateRowStats();
+    })();
+</script>
+</body>
+</html>
