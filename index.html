@@ -1,213 +1,522 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>📄 Contract Note Importer · Old + New Format</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
-        body {
-            background: #f4f7fb;
-            margin: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            max-width: 1450px;
-            width: 100%;
-            background: white;
-            border-radius: 20px;
-            padding: 25px 25px 30px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
-        }
-        h1 {
-            font-size: 24px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #1e293b;
-            margin: 0 0 8px 0;
-        }
-        h1 i { color: #2563eb; }
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            background: #f8fafc;
-            padding: 14px 20px;
-            border-radius: 40px;
-            margin: 18px 0 22px 0;
-            border: 1px solid #e9edf4;
-        }
-        .file-actions {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-        }
-        .file-actions button {
-            background: #1e293b;
-            border: none;
-            color: white;
-            font-weight: 500;
-            padding: 10px 18px;
-            border-radius: 40px;
-            font-size: 13px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            transition: 0.2s;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
-        }
-        .file-actions button:hover { transform: scale(1.02); }
-        .btn-old { background: #0f766e !important; }
-        .btn-old:hover { background: #0d9488 !important; }
-        .btn-new { background: #1d4ed8 !important; }
-        .btn-new:hover { background: #1e40af !important; }
-        .btn-excel { background: #1d6f42 !important; }
-        .btn-excel:hover { background: #145a34 !important; }
-        .btn-csv { background: #0b2b4a !important; }
-        .btn-csv:hover { background: #082036 !important; }
-        .file-badge {
-            background: #e9edf4;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 13px;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            max-width: 280px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .file-badge i { color: #2563eb; }
-        .stats { font-size: 14px; color: #475569; }
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid #e9edf4;
-            background: white;
-            margin-top: 6px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            min-width: 1300px;
-        }
-        th {
-            background: #eef2f6;
-            color: #0f172a;
-            font-weight: 600;
-            padding: 14px 10px;
-            white-space: nowrap;
-            text-align: center;
-            border-bottom: 3px double #b9c4d4;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        td {
-            padding: 9px 10px;
-            border-bottom: 1px solid #eef2f6;
-            vertical-align: middle;
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .source-file { color: #475569; font-size: 11px; }
-        .empty-state {
-            padding: 50px 20px;
-            text-align: center;
-            color: #6b7a8f;
-            font-size: 15px;
-        }
-        .empty-state i { font-size: 44px; color: #b9c8dd; margin-bottom: 10px; display: block; }
-        .footer-note {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            color: #4b5b6e;
-            font-size: 13px;
-            gap: 18px;
-            flex-wrap: wrap;
-        }
-        .footer-note i { margin-right: 5px; color: #3b82f6; }
-        .separator-row td { height: 4px; padding: 0; border: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anand Rathi · Contract Note Importer</title>
+  <!-- Font Awesome & ExcelJS / FileSaver (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <style>
+    /* ----- reset & base ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f2f6fc;
+      font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+      color: #0b1a33;
+      padding: 28px 24px;
+      line-height: 1.5;
+    }
+
+    .app {
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    /* ----- cards & shadows ----- */
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 8px 28px rgba(0, 20, 60, 0.06), 0 2px 8px rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(203, 213, 225, 0.4);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #eef2f6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #fafcff;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .card-header h3 {
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      color: #1a2b4a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-header .badge {
+      background: #eef4ff;
+      color: #1e4a8b;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* ----- header (brand) ----- */
+    .brand-header {
+      background: linear-gradient(145deg, #0f254a, #1a3a74);
+      border-radius: 24px;
+      padding: 20px 32px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 12px 28px rgba(18, 52, 106, 0.20);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(2px);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #b8d0ff;
+    }
+
+    .brand-text h1 {
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      color: white;
+    }
+
+    .brand-text p {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .brand-stats {
+      display: flex;
+      gap: 32px;
+      color: white;
+    }
+
+    .stat-unit {
+      text-align: right;
+    }
+
+    .stat-unit .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      opacity: 0.6;
+      font-weight: 500;
+    }
+
+    .stat-unit .value {
+      font-weight: 600;
+      font-size: 1.5rem;
+      line-height: 1.3;
+    }
+
+    /* ----- toolbar ----- */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 12px;
+      padding: 14px 20px;
+      background: white;
+      border-radius: 18px;
+      margin-bottom: 22px;
+      border: 1px solid #e2eaf2;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: #f0f4fc;
+      color: #1e3d6b;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .btn i {
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background: #1a3a74;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0f2a57;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(21, 56, 122, 0.25);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #d0dcec;
+      color: #1a2b4a;
+    }
+    .btn-outline:hover {
+      background: #f0f6ff;
+      border-color: #92b0e0;
+    }
+
+    .btn-success {
+      background: #0d6832;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #0a5127;
+      transform: translateY(-1px);
+    }
+
+    .btn-dark {
+      background: #1e293b;
+      color: white;
+    }
+    .btn-dark:hover {
+      background: #0f172a;
+    }
+
+    .btn-danger {
+      background: #b22234;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #8f1c1e;
+    }
+
+    .btn-ghost {
+      background: #eef3fa;
+      color: #1f3a66;
+    }
+    .btn-ghost:hover {
+      background: #dee9f5;
+    }
+
+    .file-indicator {
+      margin-left: auto;
+      background: #f2f7fe;
+      padding: 6px 18px 6px 14px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      color: #1f3a66;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 340px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid #dae4f0;
+    }
+
+    .file-indicator i {
+      color: #2a5a9c;
+    }
+
+    /* ----- table card ----- */
+    .table-wrapper {
+      overflow-x: auto;
+      max-height: 64vh;
+      border-radius: 0 0 20px 20px;
+      background: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 1280px;
+    }
+
+    th {
+      background: #192f4e;
+      color: white;
+      font-weight: 500;
+      padding: 12px 10px;
+      text-align: left;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      font-size: 0.7rem;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    th:last-child {
+      border-right: none;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #edf2f9;
+      white-space: nowrap;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #14273e;
+    }
+
+    tr:hover td {
+      background: #f8fbff;
+    }
+
+    .source-file {
+      color: #56739b;
+      font-size: 0.7rem;
+    }
+
+    .empty-state {
+      padding: 70px 20px;
+      text-align: center;
+      color: #8ba0c2;
+    }
+
+    .empty-state i {
+      font-size: 44px;
+      color: #c5d5ea;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+      font-weight: 450;
+      color: #34507a;
+    }
+
+    .empty-state small {
+      color: #7a94b9;
+    }
+
+    /* separator rows */
+    .sep-blue td {
+      background: #d6e7ff !important;
+      height: 6px;
+      padding: 0;
+      border: none;
+    }
+    .sep-yellow td {
+      background: #fcf6b0 !important;
+      height: 6px;
+      padding: 0;
+      border: none;
+    }
+
+    /* ----- footer & legend ----- */
+    .footer-bar {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #43658b;
+      padding: 0 6px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
+
+    .dot-blue {
+      background: #d6e7ff;
+      border: 1px solid #8cb0e0;
+    }
+    .dot-yellow {
+      background: #fcf6b0;
+      border: 1px solid #d9ce6b;
+    }
+
+    .credit {
+      color: #4b6f99;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .credit i {
+      color: #2a5a9c;
+      opacity: 0.7;
+    }
+
+    .credit a {
+      color: #1a3a74;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .credit a:hover {
+      text-decoration: underline;
+    }
+
+    /* mobile fine-tune */
+    @media (max-width: 720px) {
+      .brand-header {
+        flex-direction: column;
+        align-items: start;
+        gap: 14px;
+      }
+      .brand-stats {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .toolbar {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .file-indicator {
+        margin-left: 0;
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h1>
-        <i class="fas fa-file-contract"></i>
-        Contract Note Importer
-        <span style="font-weight:400;font-size:15px;margin-left:10px;color:#64748b;">Old Format + New Format</span>
-        <span style="font-weight:400;font-size:16px;margin-left:auto;color:#3b6b9b;" id="fileCountDisplay">📁 0 files</span>
-    </h1>
+<div class="app">
 
-    <div class="toolbar">
-        <div class="file-actions">
-            <button id="selectFilesBtn"><i class="fas fa-folder-open"></i> Select Files</button>
-            <button id="importOldBtn" class="btn-old"><i class="fas fa-file-alt"></i> Import Old Format</button>
-            <button id="importNewBtn" class="btn-new"><i class="fas fa-layer-group"></i> Import New + Combined</button>
-            <button id="exportExcelBtn" class="btn-excel"><i class="fas fa-file-excel"></i> Excel</button>
-            <button id="exportCsvBtn" class="btn-csv"><i class="fas fa-file-csv"></i> CSV</button>
-            <span class="file-badge" id="selectedFileList"><i class="fas fa-file-alt"></i> No file selected</span>
-        </div>
-        <div class="stats" id="rowStats">📊 0 rows</div>
+  <!-- header -->
+  <header class="brand-header">
+    <div class="brand-left">
+      <div class="brand-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+      <div class="brand-text">
+        <h1>Anand Rathi · Contract Note Importer</h1>
+        <p><i class="fas fa-chevron-right" style="font-size:8px;opacity:0.6;"></i> Old Detailed + New Summary formats</p>
+      </div>
     </div>
+    <div class="brand-stats">
+      <div class="stat-unit">
+        <span class="label">Files</span>
+        <div class="value" id="fileCountDisplay">0</div>
+      </div>
+      <div class="stat-unit">
+        <span class="label">Rows</span>
+        <div class="value" id="rowStats">0</div>
+      </div>
+    </div>
+  </header>
 
+  <!-- toolbar -->
+  <div class="toolbar">
+    <button class="btn btn-primary" id="selectFilesBtn"><i class="fas fa-folder-open"></i> Select Files</button>
+    <button class="btn btn-ghost" id="importOldBtn"><i class="fas fa-file-alt"></i> Old Format</button>
+    <button class="btn btn-ghost" id="importNewBtn"><i class="fas fa-layer-group"></i> New + Combined</button>
+    <button class="btn btn-success" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Excel</button>
+    <button class="btn btn-dark" id="exportCsvBtn"><i class="fas fa-file-csv"></i> CSV</button>
+    <button class="btn btn-danger" id="clearBtn"><i class="fas fa-trash-alt"></i> Clear</button>
+
+    <div class="file-indicator" id="selectedFileList">
+      <i class="fas fa-info-circle"></i> No files selected
+    </div>
+  </div>
+
+  <!-- table card -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-table" style="color:#1e4a8b;"></i> Imported Data Preview</h3>
+      <span class="badge"><i class="far fa-circle" style="color:#f7e86a;"></i> Party change · <i class="far fa-circle" style="color:#9fc5ff;"></i> Contract note change</span>
+    </div>
     <div class="table-wrapper">
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>PartyCode</th><th>Exchange</th><th>Trade Date</th><th>Scrip Name</th><th>ISIN</th>
-                    <th>Sell/Buy</th><th>Trade Type</th><th>Trade Qty</th><th>Market Rate</th><th>Market Amount</th>
-                    <th>Brokerage</th><th>ClientName</th><th>Order No</th><th>TRADE_TIME</th><th>Trade No</th>
-                    <th>Terminal No / Batch ID</th><th>Contract Note No</th><th>Settlement</th><th>Broker</th>
-                    <th>Source File</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr>
-                    <td colspan="20" class="empty-state">
-                        <i class="fas fa-inbox"></i>
-                        No data imported<br>
-                        <span style="font-size:13px;">
-                            <b>Import Old Format</b> → detailed trades<br>
-                            <b>Import New + Combined</b> → summary + both formats
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+      <table>
+        <thead>
+          <tr>
+            <th>PartyCode</th><th>Exchange</th><th>Trade Date</th><th>Scrip Name</th><th>ISIN</th>
+            <th>Sell/Buy</th><th>Trade Type</th><th>Trade Qty</th><th>Market Rate</th><th>Market Amount</th>
+            <th>Brokerage</th><th>ClientName</th><th>Order No</th><th>TRADE_TIME</th><th>Trade No</th>
+            <th>Terminal No</th><th>Contract Note No</th><th>Settlement</th><th>Broker</th><th>Source File</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td colspan="20" class="empty-state">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>No data imported yet</p>
+              <small>Select .txt files and choose an import method</small>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="footer-note">
-        <span><i class="fas fa-circle" style="color:#c8dcff"></i> Blue = Contract Note change</span>
-        <span><i class="fas fa-circle" style="color:#ffff96"></i> Yellow = Party Code change</span>
-        <span><i class="fas fa-file-excel"></i> Excel export is fully styled</span>
+  <!-- footer -->
+  <div class="footer-bar">
+    <div class="legend">
+      <span class="legend-item"><span class="dot dot-yellow"></span> Party Code change</span>
+      <span class="legend-item"><span class="dot dot-blue"></span> Contract Note change</span>
     </div>
+    <div class="credit">
+      <i class="fas fa-code"></i> Developed by <a href="mailto:Vikramchhajer@gmail.com">Vikram Chhajer</a>
+      <span style="opacity:0.5;margin:0 4px;">·</span>
+      <span style="opacity:0.7;">v1.0</span>
+    </div>
+  </div>
 </div>
 
 <script>
-(function () {
+  (function() {
     "use strict";
 
+    // ---------- state ----------
     let selectedFiles = [];
     let parsedRows = [];
     let includeBuyBack = false;
 
-    // DOM
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.multiple = true;
@@ -215,502 +524,481 @@
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
+    // DOM refs
     const selectBtn = document.getElementById('selectFilesBtn');
     const importOldBtn = document.getElementById('importOldBtn');
     const importNewBtn = document.getElementById('importNewBtn');
     const exportExcelBtn = document.getElementById('exportExcelBtn');
     const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const clearBtn = document.getElementById('clearBtn');
     const fileBadge = document.getElementById('selectedFileList');
     const fileCountSpan = document.getElementById('fileCountDisplay');
     const rowStats = document.getElementById('rowStats');
     const tbody = document.getElementById('tableBody');
 
-    // ---------- UI helpers ----------
+    // ---------- UI updates ----------
     function updateFileBadge() {
-        if (selectedFiles.length === 0) {
-            fileBadge.innerHTML = '<i class="fas fa-file-alt"></i> No file selected';
-            fileCountSpan.textContent = '📁 0 files';
-            return;
-        }
-        const names = selectedFiles.map(f => f.name).join(', ');
-        const short = names.length > 55 ? names.slice(0, 50) + '…' : names;
-        fileBadge.innerHTML = `<i class="fas fa-file-alt"></i> ${selectedFiles.length} file(s): ${short}`;
-        fileCountSpan.textContent = `📁 ${selectedFiles.length} files`;
+      if (selectedFiles.length === 0) {
+        fileBadge.innerHTML = '<i class="fas fa-info-circle"></i> No files selected';
+        fileCountSpan.textContent = '0';
+        return;
+      }
+      const names = selectedFiles.map(f => f.name).join(', ');
+      const short = names.length > 48 ? names.slice(0, 45) + '…' : names;
+      fileBadge.innerHTML = `<i class="fas fa-file-alt"></i> ${selectedFiles.length} file(s): ${short}`;
+      fileCountSpan.textContent = selectedFiles.length;
     }
 
     function updateRowStats() {
-        const count = parsedRows.filter(r => !r.isSeparator).length;
-        rowStats.textContent = `📊 ${count} rows`;
+      const count = parsedRows.filter(r => !r.isSeparator).length;
+      rowStats.textContent = count;
     }
 
-    // ======================================================
-    //  UTILITIES
-    // ======================================================
+    // ---------- helpers (unchanged logic) ----------
     function isNumericToken(tok) {
-        let t = (tok || '').trim().replace(/,/g, '');
-        if (t.startsWith('(') && t.endsWith(')')) t = '-' + t.slice(1, -1);
-        return t !== '' && !isNaN(parseFloat(t)) && isFinite(t);
+      let t = (tok || '').trim().replace(/,/g, '');
+      if (t.startsWith('(') && t.endsWith(')')) t = '-' + t.slice(1, -1);
+      return t !== '' && !isNaN(parseFloat(t)) && isFinite(t);
     }
 
     function splitClean(str) {
-        return str.trim().split(/\s+/).filter(s => s.length > 0);
+      return str.trim().split(/\s+/).filter(s => s.length > 0);
     }
 
     function extractNumber(txt) {
-        const m = (txt || '').match(/\d+/);
-        return m ? m[0] : '';
+      const m = (txt || '').match(/\d+/);
+      return m ? m[0] : '';
     }
 
     function extractDate(txt) {
-        const m = (txt || '').match(/\d{1,2}[-.\/]\d{1,2}[-.\/]\d{2,4}/);
-        return m ? m[0].replace(/[\/.]/g, '-') : '';
+      const m = (txt || '').match(/\d{1,2}[-.\/]\d{1,2}[-.\/]\d{2,4}/);
+      return m ? m[0].replace(/[\/.]/g, '-') : '';
     }
 
     function isValidClientName(name) {
-        if (!name || name.length < 5) return false;
-        const invalid = ['INVOICE', 'REFERENCE', 'NUMBER', 'COMPLIANCE', 'OFFICER', 'SEBI', 'GSTIN',
-            'CONTRACT NOTE', 'SETTLEMENT', 'TRADE DATE', 'ANAND RATHI', 'BUY BACK', 'OFFER FOR SALE'];
-        const upper = name.toUpperCase();
-        for (let t of invalid) if (upper.includes(t)) return false;
-        if (name.indexOf(' ') === -1) return false;
-        return true;
+      if (!name || name.length < 5) return false;
+      const invalid = ['INVOICE', 'REFERENCE', 'NUMBER', 'COMPLIANCE', 'OFFICER', 'SEBI', 'GSTIN',
+        'CONTRACT NOTE', 'SETTLEMENT', 'TRADE DATE', 'ANAND RATHI', 'BUY BACK', 'OFFER FOR SALE'];
+      const upper = name.toUpperCase();
+      for (let t of invalid) if (upper.includes(t)) return false;
+      if (name.indexOf(' ') === -1) return false;
+      return true;
     }
 
     function extractClientName(text) {
-        const lines = text.split(/\r?\n/);
-        for (let i = 0; i < Math.min(lines.length, 60); i++) {
-            const line = lines[i].trim();
-            const match = line.match(/^(.+?)\s*\((GMR[A-Z0-9]+)\)/i);
-            if (match) {
-                let name = match[1].trim().replace(/^(MR\.?|MRS\.?|MS\.?|SHRI|SMT)\s+/i, '');
-                if (isValidClientName(name)) return name;
-            }
+      const lines = text.split(/\r?\n/);
+      for (let i = 0; i < Math.min(lines.length, 60); i++) {
+        const line = lines[i].trim();
+        const match = line.match(/^(.+?)\s*\((GMR[A-Z0-9]+)\)/i);
+        if (match) {
+          let name = match[1].trim().replace(/^(MR\.?|MRS\.?|MS\.?|SHRI|SMT)\s+/i, '');
+          if (isValidClientName(name)) return name;
         }
-        return '';
-    }
-
-    // ======================================================
-    //  PARSER 1 : OLD FORMAT
-    // ======================================================
-    function parseOldFormat(text, fileName) {
-        text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        const lines = text.split('\n');
-
-        let partyCode = '', clientName = '', tradeDate = '', contractNo = '';
-        let settlement = '', exchange = 'NSE', tradeType = 'Normal';
-        let broker = 'Anand Rathi Share and Stock Brokers Limited';
-        let currentISIN = '';
-        let rows = [];
-        let pending = [];
-
-        clientName = extractClientName(text);
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (!line) continue;
-
-            const codeMatch = line.match(/\((GMR[A-Z0-9]+)\)/i);
-            if (codeMatch) {
-                partyCode = codeMatch[1].toUpperCase();
-                if (!clientName) {
-                    let n = line.substring(0, line.indexOf('(')).trim();
-                    if (isValidClientName(n)) clientName = n;
-                }
-            }
-            if (line.toUpperCase().includes('TRADING BACK OFFICE CODE')) {
-                const pc = line.split(':')[1];
-                if (pc) partyCode = pc.trim().split(/\s+/)[0];
-            }
-            if (line.toUpperCase().includes('CONTRACT NOTE NO.')) contractNo = extractNumber(line);
-            if (line.toUpperCase().includes('TRADE DATE')) tradeDate = extractDate(line);
-            if ((line.toUpperCase().includes('SETTLEMENT NO.') || line.toUpperCase().includes('SETTLEMENT DATE')) && !settlement) {
-                settlement = extractNumber(line);
-            }
-            if (line.toUpperCase().includes('BSE CAPITAL')) exchange = 'BSE';
-            if (line.toUpperCase().includes('BUY BACK')) tradeType = 'Buy Back';
-            if (line.toUpperCase().includes('OFFER FOR SALE')) tradeType = 'OFS';
-
-            if (line.toUpperCase().includes('ISIN:')) {
-                currentISIN = line.replace(/ISIN:/i, '').trim().split(/\s+/)[0];
-                for (let p of pending) {
-                    rows.push(makeRow(partyCode, exchange, tradeDate, p.scrip, currentISIN, p.side, tradeType,
-                        p.qty, p.rate, p.amt, p.brok, clientName, p.orderNo, p.time, p.tradeNo, '-',
-                        contractNo, settlement, broker, fileName));
-                }
-                pending = [];
-            }
-
-            if (isNumericToken(splitClean(line)[0]) && (line.toUpperCase().includes(' BUY ') || line.toUpperCase().includes(' SELL '))) {
-                const tokens = splitClean(line);
-                let bsIdx = -1;
-                for (let k = 0; k < tokens.length; k++) {
-                    if (tokens[k].toUpperCase() === 'BUY' || tokens[k].toUpperCase() === 'SELL') {
-                        bsIdx = k; break;
-                    }
-                }
-                if (bsIdx === -1) continue;
-
-                const orderNo = tokens[0];
-                let tradeTime = '', tradeNo = '', scrip = '';
-                for (let k = 1; k < bsIdx; k++) {
-                    if (tokens[k].includes(':') || /AM|PM/i.test(tokens[k])) {
-                        if (!tradeTime) tradeTime = tokens[k];
-                    } else if (isNumericToken(tokens[k]) && tokens[k].length > 4) {
-                        tradeNo = tokens[k];
-                    } else if (!isNumericToken(tokens[k])) {
-                        scrip += (scrip ? ' ' : '') + tokens[k];
-                    }
-                }
-
-                const side = tokens[bsIdx].toUpperCase();
-                const qty = parseFloat(tokens[bsIdx + 1]) || 0;
-                let ratePos = bsIdx + 2;
-                if (tokens[ratePos] && (tokens[ratePos].toUpperCase() === 'D' || tokens[ratePos].toUpperCase() === 'S')) ratePos++;
-                const rate = parseFloat(tokens[ratePos]) || 0;
-                const brok = parseFloat(tokens[ratePos + 1]) || 0;
-                let netAmt = 0;
-                for (let k = tokens.length - 1; k > bsIdx + 2; k--) {
-                    if (isNumericToken(tokens[k])) { netAmt = parseFloat(tokens[k]); break; }
-                }
-
-                pending.push({ scrip, side, qty, rate, amt: Math.abs(netAmt), brok, orderNo, time: tradeTime, tradeNo });
-            }
-        }
-
-        for (let p of pending) {
-            rows.push(makeRow(partyCode, exchange, tradeDate, p.scrip, currentISIN, p.side, tradeType,
-                p.qty, p.rate, p.amt, p.brok, clientName, p.orderNo, p.time, p.tradeNo, '-',
-                contractNo, settlement, broker, fileName));
-        }
-        return rows;
-    }
-
-    // ======================================================
-    //  PARSER 2 : NEW + COMBINED
-    // ======================================================
-    function parseNewCombined(text, fileName) {
-        let rows = parseOldFormat(text, fileName);
-
-        const lines = text.replace(/\r\n/g, '\n').split('\n');
-        let partyCode = '', clientName = '', tradeDate = '', contractNo = '';
-        let settlement = '', exchange = 'NSE', tradeType = 'Normal';
-        let broker = 'Anand Rathi Share and Stock Brokers Limited';
-
-        clientName = extractClientName(text);
-
-        for (let line of lines) {
-            line = line.trim();
-            if (!line) continue;
-
-            const codeMatch = line.match(/\((GMR[A-Z0-9]+)\)/i);
-            if (codeMatch) {
-                partyCode = codeMatch[1].toUpperCase();
-                if (!clientName) {
-                    let n = line.substring(0, line.indexOf('(')).trim();
-                    if (isValidClientName(n)) clientName = n;
-                }
-            }
-            if (line.toUpperCase().includes('TRADING BACK OFFICE CODE')) {
-                const pc = line.split(':')[1];
-                if (pc) partyCode = pc.trim().split(/\s+/)[0];
-            }
-            if (line.toUpperCase().includes('CONTRACT NOTE NO.')) contractNo = extractNumber(line);
-            if (line.toUpperCase().includes('TRADE DATE')) tradeDate = extractDate(line);
-            if ((line.toUpperCase().includes('SETTLEMENT NO.') || line.toUpperCase().includes('SETTLEMENT DATE')) && !settlement) {
-                settlement = extractNumber(line);
-            }
-            if (line.toUpperCase().includes('BSE CAPITAL')) exchange = 'BSE';
-            if (line.toUpperCase().includes('BUY BACK')) tradeType = 'Buy Back';
-            if (line.toUpperCase().includes('OFFER FOR SALE')) tradeType = 'OFS';
-
-            // Summary format
-            if ((line.startsWith('INE') || line.startsWith('INDIA')) && line.includes(' ')) {
-                const parts = splitClean(line);
-                let numStart = -1;
-                for (let k = 1; k < parts.length; k++) {
-                    if (isNumericToken(parts[k]) || parts[k] === '0' || parts[k] === '0.00') {
-                        numStart = k; break;
-                    }
-                }
-                if (numStart > 1 && parts.length >= numStart + 12) {
-                    const isin = parts[0];
-                    const scripName = parts.slice(1, numStart).join(' ');
-                    const buyQty = parseFloat(parts[numStart]) || 0;
-                    const buyWAP = parseFloat(parts[numStart + 1]) || 0;
-                    const buyBrok = parseFloat(parts[numStart + 2]) || 0;
-                    const buyAmt = parseFloat(parts[numStart + 4]) || 0;
-                    const sellQty = parseFloat(parts[numStart + 5]) || 0;
-                    const sellWAP = parseFloat(parts[numStart + 6]) || 0;
-                    const sellBrok = parseFloat(parts[numStart + 7]) || 0;
-                    const sellAmt = parseFloat(parts[numStart + 9]) || 0;
-
-                    if (buyQty > 0) {
-                        rows.push(makeRow(partyCode, exchange, tradeDate, scripName, isin, 'BUY', tradeType,
-                            buyQty, buyWAP, Math.abs(buyAmt), buyBrok, clientName, '-', '-', '-', '-',
-                            contractNo, settlement, broker, fileName));
-                    }
-                    if (sellQty > 0) {
-                        rows.push(makeRow(partyCode, exchange, tradeDate, scripName, isin, 'SELL', tradeType,
-                            sellQty, sellWAP, Math.abs(sellAmt), sellBrok, clientName, '-', '-', '-', '-',
-                            contractNo, settlement, broker, fileName));
-                    }
-                }
-            }
-        }
-        return rows;
+      }
+      return '';
     }
 
     function makeRow(partyCode, exchange, tradeDate, scripName, isin, side, tradeType,
                      qty, rate, amt, brok, clientName, orderNo, tradeTime, tradeNo, terminal,
                      contractNo, settlement, broker, sourceFile) {
-        return {
-            PartyCode: partyCode || '', Exchange: exchange || '', TradeDate: tradeDate || '',
-            ScripName: scripName || '', ISIN: isin || '', SellBuy: side || '', TradeType: tradeType || '',
-            TradeQty: qty || '', MarketRate: rate || '', MarketAmount: amt || '', Brokerage: brok || '',
-            ClientName: clientName || '', OrderNo: orderNo || '-', TradeTime: tradeTime || '-',
-            TradeNo: tradeNo || '-', TerminalNo: terminal || '-', ContractNote: contractNo || '',
-            Settlement: settlement || '', Broker: broker || '', SourceFile: sourceFile || '',
-            isSeparator: false
-        };
+      return {
+        PartyCode: partyCode || '', Exchange: exchange || '', TradeDate: tradeDate || '',
+        ScripName: scripName || '', ISIN: isin || '', SellBuy: side || '', TradeType: tradeType || '',
+        TradeQty: qty || '', MarketRate: rate || '', MarketAmount: amt || '', Brokerage: brok || '',
+        ClientName: clientName || '', OrderNo: orderNo || '-', TradeTime: tradeTime || '-',
+        TradeNo: tradeNo || '-', TerminalNo: terminal || '-', ContractNote: contractNo || '',
+        Settlement: settlement || '', Broker: broker || '', SourceFile: sourceFile || '',
+        isSeparator: false
+      };
     }
 
-    // ---------- Separators ----------
+    // ---------- OLD parser (exact) ----------
+    function parseOldFormat(text, fileName) {
+      text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      const lines = text.split('\n');
+      let partyCode = '', clientName = '', tradeDate = '', contractNo = '';
+      let settlement = '', exchange = 'NSE', tradeType = 'Normal';
+      let broker = 'Anand Rathi Share and Stock Brokers Limited';
+      let currentISIN = '';
+      let rows = [];
+      let pending = [];
+
+      clientName = extractClientName(text);
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (!line) continue;
+
+        const codeMatch = line.match(/\((GMR[A-Z0-9]+)\)/i);
+        if (codeMatch) {
+          partyCode = codeMatch[1].toUpperCase();
+          if (!clientName) {
+            let n = line.substring(0, line.indexOf('(')).trim();
+            if (isValidClientName(n)) clientName = n;
+          }
+        }
+        if (line.toUpperCase().includes('TRADING BACK OFFICE CODE')) {
+          const pc = line.split(':')[1];
+          if (pc) partyCode = pc.trim().split(/\s+/)[0];
+        }
+        if (line.toUpperCase().includes('CONTRACT NOTE NO.')) contractNo = extractNumber(line);
+        if (line.toUpperCase().includes('TRADE DATE')) tradeDate = extractDate(line);
+        if ((line.toUpperCase().includes('SETTLEMENT NO.') || line.toUpperCase().includes('SETTLEMENT DATE')) && !settlement) {
+          settlement = extractNumber(line);
+        }
+        if (line.toUpperCase().includes('BSE CAPITAL')) exchange = 'BSE';
+        if (line.toUpperCase().includes('BUY BACK')) tradeType = 'Buy Back';
+        if (line.toUpperCase().includes('OFFER FOR SALE')) tradeType = 'OFS';
+
+        if (line.toUpperCase().includes('ISIN:')) {
+          currentISIN = line.replace(/ISIN:/i, '').trim().split(/\s+/)[0];
+          for (let p of pending) {
+            rows.push(makeRow(partyCode, exchange, tradeDate, p.scrip, currentISIN, p.side, tradeType,
+              p.qty, p.rate, p.amt, p.brok, clientName, p.orderNo, p.time, p.tradeNo, '-',
+              contractNo, settlement, broker, fileName));
+          }
+          pending = [];
+        }
+
+        if (isNumericToken(splitClean(line)[0]) && (line.toUpperCase().includes(' BUY ') || line.toUpperCase().includes(' SELL '))) {
+          const tokens = splitClean(line);
+          let bsIdx = -1;
+          for (let k = 0; k < tokens.length; k++) {
+            if (tokens[k].toUpperCase() === 'BUY' || tokens[k].toUpperCase() === 'SELL') {
+              bsIdx = k; break;
+            }
+          }
+          if (bsIdx === -1) continue;
+
+          const orderNo = tokens[0];
+          let tradeTime = '', tradeNo = '', scrip = '';
+          for (let k = 1; k < bsIdx; k++) {
+            if (tokens[k].includes(':') || /AM|PM/i.test(tokens[k])) {
+              if (!tradeTime) tradeTime = tokens[k];
+            } else if (isNumericToken(tokens[k]) && tokens[k].length > 4) {
+              tradeNo = tokens[k];
+            } else if (!isNumericToken(tokens[k])) {
+              scrip += (scrip ? ' ' : '') + tokens[k];
+            }
+          }
+
+          const side = tokens[bsIdx].toUpperCase();
+          const qty = parseFloat(tokens[bsIdx + 1]) || 0;
+          let ratePos = bsIdx + 2;
+          if (tokens[ratePos] && (tokens[ratePos].toUpperCase() === 'D' || tokens[ratePos].toUpperCase() === 'S')) ratePos++;
+          const rate = parseFloat(tokens[ratePos]) || 0;
+          const brok = parseFloat(tokens[ratePos + 1]) || 0;
+          let netAmt = 0;
+          for (let k = tokens.length - 1; k > bsIdx + 2; k--) {
+            if (isNumericToken(tokens[k])) { netAmt = parseFloat(tokens[k]); break; }
+          }
+
+          pending.push({ scrip, side, qty, rate, amt: Math.abs(netAmt), brok, orderNo, time: tradeTime, tradeNo });
+        }
+      }
+
+      for (let p of pending) {
+        rows.push(makeRow(partyCode, exchange, tradeDate, p.scrip, currentISIN, p.side, tradeType,
+          p.qty, p.rate, p.amt, p.brok, clientName, p.orderNo, p.time, p.tradeNo, '-',
+          contractNo, settlement, broker, fileName));
+      }
+      return rows;
+    }
+
+    // ---------- NEW + combined parser ----------
+    function parseNewCombined(text, fileName) {
+      let rows = parseOldFormat(text, fileName);
+
+      const lines = text.replace(/\r\n/g, '\n').split('\n');
+      let partyCode = '', clientName = '', tradeDate = '', contractNo = '';
+      let settlement = '', exchange = 'NSE', tradeType = 'Normal';
+      let broker = 'Anand Rathi Share and Stock Brokers Limited';
+
+      clientName = extractClientName(text);
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+
+        const codeMatch = line.match(/\((GMR[A-Z0-9]+)\)/i);
+        if (codeMatch) {
+          partyCode = codeMatch[1].toUpperCase();
+          if (!clientName) {
+            let n = line.substring(0, line.indexOf('(')).trim();
+            if (isValidClientName(n)) clientName = n;
+          }
+        }
+        if (line.toUpperCase().includes('TRADING BACK OFFICE CODE')) {
+          const pc = line.split(':')[1];
+          if (pc) partyCode = pc.trim().split(/\s+/)[0];
+        }
+        if (line.toUpperCase().includes('CONTRACT NOTE NO.')) contractNo = extractNumber(line);
+        if (line.toUpperCase().includes('TRADE DATE')) tradeDate = extractDate(line);
+        if ((line.toUpperCase().includes('SETTLEMENT NO.') || line.toUpperCase().includes('SETTLEMENT DATE')) && !settlement) {
+          settlement = extractNumber(line);
+        }
+        if (line.toUpperCase().includes('BSE CAPITAL')) exchange = 'BSE';
+        if (line.toUpperCase().includes('BUY BACK')) tradeType = 'Buy Back';
+        if (line.toUpperCase().includes('OFFER FOR SALE')) tradeType = 'OFS';
+
+        if ((line.startsWith('INE') || line.startsWith('INDIA')) && line.includes(' ')) {
+          const parts = splitClean(line);
+          let numStart = -1;
+          for (let k = 1; k < parts.length; k++) {
+            if (isNumericToken(parts[k]) || parts[k] === '0' || parts[k] === '0.00') {
+              numStart = k; break;
+            }
+          }
+          if (numStart > 1 && parts.length >= numStart + 12) {
+            const isin = parts[0];
+            const scripName = parts.slice(1, numStart).join(' ');
+            const buyQty = parseFloat(parts[numStart]) || 0;
+            const buyWAP = parseFloat(parts[numStart + 1]) || 0;
+            const buyBrok = parseFloat(parts[numStart + 2]) || 0;
+            const buyAmt = parseFloat(parts[numStart + 4]) || 0;
+            const sellQty = parseFloat(parts[numStart + 5]) || 0;
+            const sellWAP = parseFloat(parts[numStart + 6]) || 0;
+            const sellBrok = parseFloat(parts[numStart + 7]) || 0;
+            const sellAmt = parseFloat(parts[numStart + 9]) || 0;
+
+            if (buyQty > 0) {
+              rows.push(makeRow(partyCode, exchange, tradeDate, scripName, isin, 'BUY', tradeType,
+                buyQty, buyWAP, Math.abs(buyAmt), buyBrok, clientName, '-', '-', '-', '-',
+                contractNo, settlement, broker, fileName));
+            }
+            if (sellQty > 0) {
+              rows.push(makeRow(partyCode, exchange, tradeDate, scripName, isin, 'SELL', tradeType,
+                sellQty, sellWAP, Math.abs(sellAmt), sellBrok, clientName, '-', '-', '-', '-',
+                contractNo, settlement, broker, fileName));
+            }
+          }
+        }
+      }
+      return rows;
+    }
+
+    // ---------- boundary separators ----------
     function processWithBoundaries(rows) {
-        if (rows.length === 0) return rows;
-        let result = [];
-        let lastParty = '', lastContract = '';
+      if (rows.length === 0) return rows;
+      let result = [];
+      let lastParty = '', lastContract = '';
 
-        for (let i = 0; i < rows.length; i++) {
-            const r = rows[i];
-            if (i > 0) {
-                if (r.PartyCode && lastParty && r.PartyCode !== lastParty) {
-                    result.push({ isSeparator: true, color: 'yellow' });
-                } else if (r.ContractNote && lastContract && r.ContractNote !== lastContract) {
-                    result.push({ isSeparator: true, color: 'blue' });
-                }
-            }
-            result.push(r);
-            if (r.PartyCode) lastParty = r.PartyCode;
-            if (r.ContractNote) lastContract = r.ContractNote;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (i > 0) {
+          if (r.PartyCode && lastParty && r.PartyCode !== lastParty) {
+            result.push({ isSeparator: true, color: 'yellow' });
+          } else if (r.ContractNote && lastContract && r.ContractNote !== lastContract) {
+            result.push({ isSeparator: true, color: 'blue' });
+          }
         }
-        return result;
+        result.push(r);
+        if (r.PartyCode) lastParty = r.PartyCode;
+        if (r.ContractNote) lastContract = r.ContractNote;
+      }
+      return result;
     }
 
-    // ---------- Import ----------
+    // ---------- import runner ----------
     async function runImport(parserFn) {
-        if (selectedFiles.length === 0) {
-            alert('Please select at least one .txt file.');
-            return;
-        }
+      if (selectedFiles.length === 0) {
+        alert('Please select at least one .txt file.');
+        return;
+      }
 
-        let buyBackCount = 0;
-        for (let f of selectedFiles) {
-            const txt = await f.text();
-            if (txt.toUpperCase().includes('BUY BACK')) buyBackCount++;
-        }
-        includeBuyBack = false;
-        if (buyBackCount > 0) {
-            includeBuyBack = confirm(`There are ${buyBackCount} Buy Back contract(s).\n\nImport Buy Back also?\n\nOK = Yes\nCancel = Skip`);
-        }
+      let buyBackCount = 0;
+      for (let f of selectedFiles) {
+        const txt = await f.text();
+        if (txt.toUpperCase().includes('BUY BACK')) buyBackCount++;
+      }
+      includeBuyBack = false;
+      if (buyBackCount > 0) {
+        includeBuyBack = confirm(`There are ${buyBackCount} Buy Back contract(s).\n\nImport Buy Back also?\n\nOK = Yes\nCancel = Skip`);
+      }
 
-        const allRows = [];
-        for (let file of selectedFiles) {
-            const content = await file.text();
-            if (content.toUpperCase().includes('BUY BACK') && !includeBuyBack) continue;
-            const rows = parserFn(content, file.name);
-            allRows.push(...rows);
-        }
+      const allRows = [];
+      for (let file of selectedFiles) {
+        const content = await file.text();
+        if (content.toUpperCase().includes('BUY BACK') && !includeBuyBack) continue;
+        const rows = parserFn(content, file.name);
+        allRows.push(...rows);
+      }
 
-        parsedRows = processWithBoundaries(allRows);
-        renderTable(parsedRows);
-        updateRowStats();
+      parsedRows = processWithBoundaries(allRows);
+      renderTable(parsedRows);
+      updateRowStats();
     }
 
-    // ---------- Render ----------
     function renderTable(rows) {
-        if (rows.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="20" class="empty-state"><i class="fas fa-inbox"></i>No data</td></tr>`;
-            return;
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="20" class="empty-state">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>No data imported yet</p>
+          <small>Select .txt files and choose an import method</small>
+        </td></tr>`;
+        return;
+      }
+      let html = '';
+      for (let r of rows) {
+        if (r.isSeparator) {
+          const cls = r.color === 'blue' ? 'sep-blue' : 'sep-yellow';
+          html += `<tr class="${cls}"><td colspan="20"></td></tr>`;
+          continue;
         }
-        let html = '';
-        for (let r of rows) {
-            if (r.isSeparator) {
-                const bg = r.color === 'blue' ? '#c8dcff' : '#ffff96';
-                html += `<tr class="separator-row"><td colspan="20" style="height:4px;padding:0;border:none;background:${bg};"></td></tr>`;
-                continue;
-            }
-            html += '<tr>';
-            const fields = [r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN, r.SellBuy, r.TradeType,
-                r.TradeQty, r.MarketRate, r.MarketAmount, r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime,
-                r.TradeNo, r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile];
-            fields.forEach((val, idx) => {
-                if (idx === 19) html += `<td class="source-file" title="${val||''}">${val||''}</td>`;
-                else html += `<td>${val || ''}</td>`;
-            });
-            html += '</tr>';
-        }
-        tbody.innerHTML = html;
+        html += '<tr>';
+        const fields = [r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN, r.SellBuy, r.TradeType,
+          r.TradeQty, r.MarketRate, r.MarketAmount, r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime,
+          r.TradeNo, r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile];
+        fields.forEach((val, idx) => {
+          if (idx === 19) html += `<td class="source-file" title="${val||''}">${val||''}</td>`;
+          else html += `<td>${val || ''}</td>`;
+        });
+        html += '</tr>';
+      }
+      tbody.innerHTML = html;
     }
 
-    // ======================================================
-    //  PROFESSIONAL EXCEL EXPORT
-    // ======================================================
-    function exportToExcel() {
-        if (parsedRows.filter(r => !r.isSeparator).length === 0) {
-            alert('No data to export.');
-            return;
-        }
+    // ---------- Excel export (ExcelJS) ----------
+    async function exportToExcel() {
+      if (parsedRows.filter(r => !r.isSeparator).length === 0) {
+        alert('No data to export.');
+        return;
+      }
 
-        const headers = [
-            'PartyCode', 'Exchange', 'Trade Date', 'Scrip Name', 'ISIN',
-            'Sell/Buy', 'Trade Type', 'Trade Qty', 'Market Rate', 'Market Amount',
-            'Brokerage', 'ClientName', 'Order No', 'TRADE_TIME', 'Trade No',
-            'Terminal No / Batch ID', 'Contract Note No', 'Settlement', 'Broker', 'Source File'
-        ];
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet('ContractNotes', {
+        views: [{ state: 'frozen', ySplit: 1 }]
+      });
 
-        const data = [headers];
-        for (let r of parsedRows) {
-            if (r.isSeparator) {
-                data.push(new Array(20).fill(''));
-            } else {
-                data.push([
-                    r.PartyCode || '', r.Exchange || '', r.TradeDate || '', r.ScripName || '', r.ISIN || '',
-                    r.SellBuy || '', r.TradeType || '', r.TradeQty || '', r.MarketRate || '', r.MarketAmount || '',
-                    r.Brokerage || '', r.ClientName || '', r.OrderNo || '', r.TradeTime || '', r.TradeNo || '',
-                    r.TerminalNo || '', r.ContractNote || '', r.Settlement || '', r.Broker || '', r.SourceFile || ''
-                ]);
+      const widths = [12, 10, 12, 24, 14, 10, 12, 11, 12, 14, 11, 28, 14, 12, 12, 14, 16, 12, 20, 30];
+      widths.forEach((w, i) => sheet.getColumn(i + 1).width = w);
+
+      const headers = [
+        'PartyCode', 'Exchange', 'Trade Date', 'Scrip Name', 'ISIN',
+        'Sell/Buy', 'Trade Type', 'Trade Qty', 'Market Rate', 'Market Amount',
+        'Brokerage', 'ClientName', 'Order No', 'TRADE_TIME', 'Trade No',
+        'Terminal No / Batch ID', 'Contract Note No', 'Settlement', 'Broker', 'Source File'
+      ];
+
+      const headerRow = sheet.addRow(headers);
+      headerRow.height = 24;
+      headerRow.eachCell((cell) => {
+        cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        cell.border = {
+          top: { style: 'medium', color: { argb: 'FF0F172A' } },
+          bottom: { style: 'medium', color: { argb: 'FF0F172A' } },
+          left: { style: 'thin', color: { argb: 'FF334155' } },
+          right: { style: 'thin', color: { argb: 'FF334155' } }
+        };
+      });
+
+      parsedRows.forEach((r, idx) => {
+        if (r.isSeparator) {
+          const sepRow = sheet.addRow(new Array(20).fill(''));
+          sepRow.height = 12;
+          const color = r.color === 'blue' ? 'FFC8DCFF' : 'FFFFFF96';
+          sepRow.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FF94A3B8' } },
+              bottom: { style: 'thin', color: { argb: 'FF94A3B8' } },
+              left: { style: 'thin', color: { argb: 'FF94A3B8' } },
+              right: { style: 'thin', color: { argb: 'FF94A3B8' } }
+            };
+          });
+        } else {
+          const rowData = [
+            r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN,
+            r.SellBuy, r.TradeType, r.TradeQty, r.MarketRate, r.MarketAmount,
+            r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime, r.TradeNo,
+            r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile
+          ];
+          const dataRow = sheet.addRow(rowData);
+          dataRow.height = 18;
+          const bgColor = (idx % 2 === 0) ? 'FFF8FAFC' : 'FFFFFFFF';
+
+          dataRow.eachCell((cell, colNumber) => {
+            cell.font = { name: 'Calibri', size: 10 };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+            };
+            cell.alignment = { vertical: 'middle' };
+            if ([8, 9, 10, 11].includes(colNumber)) {
+              cell.alignment = { horizontal: 'right', vertical: 'middle' };
             }
+          });
         }
+      });
 
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(data);
-
-        // Column widths
-        ws['!cols'] = [
-            {wch:12},{wch:10},{wch:12},{wch:22},{wch:14},
-            {wch:10},{wch:12},{wch:11},{wch:12},{wch:14},
-            {wch:11},{wch:28},{wch:14},{wch:12},{wch:12},
-            {wch:14},{wch:16},{wch:12},{wch:18},{wch:28}
-        ];
-
-        // Row height for header
-        ws['!rows'] = [{ hpt: 22 }];
-
-        const range = XLSX.utils.decode_range(ws['!ref']);
-
-        for (let R = range.s.r; R <= range.e.r; R++) {
-            for (let C = range.s.c; C <= range.e.c; C++) {
-                const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
-                if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
-
-                // Default
-                ws[cellRef].s = {
-                    font: { name: 'Calibri', sz: 10 },
-                    alignment: { vertical: 'center', horizontal: 'left' },
-                    border: {
-                        top:    { style: 'thin', color: { rgb: 'D1D5DB' } },
-                        bottom: { style: 'thin', color: { rgb: 'D1D5DB' } },
-                        left:   { style: 'thin', color: { rgb: 'D1D5DB' } },
-                        right:  { style: 'thin', color: { rgb: 'D1D5DB' } }
-                    }
-                };
-
-                // HEADER
-                if (R === 0) {
-                    ws[cellRef].s = {
-                        font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
-                        fill: { fgColor: { rgb: '1E293B' } },
-                        alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
-                        border: {
-                            top:    { style: 'medium', color: { rgb: '0F172A' } },
-                            bottom: { style: 'medium', color: { rgb: '0F172A' } },
-                            left:   { style: 'thin', color: { rgb: '334155' } },
-                            right:  { style: 'thin', color: { rgb: '334155' } }
-                        }
-                    };
-                    continue;
-                }
-
-                const dataIndex = R - 1;
-                const rowObj = parsedRows[dataIndex];
-
-                if (rowObj && rowObj.isSeparator) {
-                    const color = rowObj.color === 'blue' ? 'C8DCFF' : 'FFFF96';
-                    ws[cellRef].s = {
-                        fill: { fgColor: { rgb: color } },
-                        border: {
-                            top:    { style: 'thin', color: { rgb: '94A3B8' } },
-                            bottom: { style: 'thin', color: { rgb: '94A3B8' } },
-                            left:   { style: 'thin', color: { rgb: '94A3B8' } },
-                            right:  { style: 'thin', color: { rgb: '94A3B8' } }
-                        }
-                    };
-                    if (!ws['!rows'][R]) ws['!rows'][R] = {};
-                    ws['!rows'][R].hpt = 10;
-                } else {
-                    // Alternating rows
-                    ws[cellRef].s.fill = {
-                        fgColor: { rgb: R % 2 === 0 ? 'F8FAFC' : 'FFFFFF' }
-                    };
-                    // Right align numbers
-                    if ([7, 8, 9, 10].includes(C)) {
-                        ws[cellRef].s.alignment = { horizontal: 'right', vertical: 'center' };
-                    }
-                }
-            }
-        }
-
-        // Freeze header
-        ws['!freeze'] = { xSplit: 0, ySplit: 1 };
-
-        XLSX.utils.book_append_sheet(wb, ws, 'ContractNotes');
-        const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-        XLSX.writeFile(wb, `AnandRathi_ContractNotes_${dateStr}.xlsx`);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+      saveAs(blob, `AnandRathi_ContractNotes_${dateStr}.xlsx`);
     }
 
-    // ---------- CSV ----------
+    // ---------- CSV export ----------
     function exportCsv() {
-        if (parsedRows.filter(r => !r.isSeparator).length === 0) {
-            alert('No data to export.');
-            return;
+      if (parsedRows.filter(r => !r.isSeparator).length === 0) {
+        alert('No data to export.');
+        return;
+      }
+      const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
+        'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
+        'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
+      let csv = headers.join(',') + '\n';
+      for (let r of parsedRows) {
+        if (r.isSeparator) {
+          csv += new Array(20).fill('').join(',') + '\n';
+        } else {
+          const row = [r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN, r.SellBuy, r.TradeType,
+            r.TradeQty, r.MarketRate, r.MarketAmount, r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime,
+            r.TradeNo, r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile];
+          csv += row.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',') + '\n';
         }
-        const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
-            'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
-            'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
-        let csv = headers.join(',') + '\n';
-        for (let r of parsedRows) {
-            if (r.isSeparator) {
-                csv += new Array(20).fill('').join(',') + '\n';
-            } else {
-                const row = [r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN, r.SellBuy, r.TradeType,
-                    r.TradeQty, r.MarketRate, r.MarketAmount, r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime,
-                    r.TradeNo, r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile];
-                csv += row.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',') + '\n';
-            }
-        }
-        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `AnandRathi_ContractNotes_${new Date().toLocaleDateString('en-GB').replace(/\//g,'-')}.csv`;
-        a.click();
+      }
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `AnandRathi_ContractNotes_${new Date().toLocaleDateString('en-GB').replace(/\//g,'-')}.csv`;
+      a.click();
     }
 
-    // ---------- Events ----------
+    function clearAll() {
+      selectedFiles = [];
+      parsedRows = [];
+      updateFileBadge();
+      updateRowStats();
+      tbody.innerHTML = `<tr><td colspan="20" class="empty-state">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>No data imported yet</p>
+        <small>Select .txt files and choose an import method</small>
+      </td></tr>`;
+    }
+
+    // ---------- event binding ----------
     selectBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', e => {
-        selectedFiles = Array.from(e.target.files);
-        updateFileBadge();
-        fileInput.value = '';
+      selectedFiles = Array.from(e.target.files);
+      updateFileBadge();
+      fileInput.value = '';
     });
 
     importOldBtn.addEventListener('click', () => runImport(parseOldFormat));
     importNewBtn.addEventListener('click', () => runImport(parseNewCombined));
     exportExcelBtn.addEventListener('click', exportToExcel);
     exportCsvBtn.addEventListener('click', exportCsv);
+    clearBtn.addEventListener('click', clearAll);
 
+    // init
     updateFileBadge();
     updateRowStats();
-})();
+  })();
 </script>
 </body>
 </html>
