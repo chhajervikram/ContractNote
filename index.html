@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>📄 Contract Note Importer · Excel & CSV</title>
-    <!-- Font Awesome & SheetJS (XLSX) -->
+    <title>📄 Contract Note Importer · Excel & CSV (Old + New Format)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -92,10 +91,8 @@
             gap: 12px;
         }
         .btn-excel { background: #1d6f42; }
-        .btn-excel i { margin-right: 4px; }
         .btn-excel:hover { background: #145a34; }
         .btn-csv { background: #0b2b4a; }
-        .btn-csv i { margin-right: 4px; }
         .btn-csv:hover { background: #082036; }
         .table-wrapper {
             overflow-x: auto;
@@ -133,8 +130,6 @@
         }
         td:first-child, th:first-child { padding-left: 14px; }
         td:last-child, th:last-child { padding-right: 14px; }
-        .highlight-blue { background: #c8dcff !important; }
-        .highlight-yellow { background: #ffff96 !important; }
         .trade-delivery { color: #0055cc; font-weight: 700; }
         .trade-intraday { color: #cc3300; font-weight: 700; }
         .source-file { color: #475569; font-size: 11px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
@@ -156,7 +151,7 @@
         }
         .footer-note i { margin-right: 5px; color: #3b82f6; }
         .separator-row td {
-            height: 2px;
+            height: 4px;
             padding: 0;
             border: none;
         }
@@ -173,9 +168,9 @@
     <h1>
         <i class="fas fa-file-contract"></i>
         Contract Note Importer
+        <span style="font-weight:400;font-size:15px;margin-left:12px;color:#64748b;">(Old Detailed + New Summary)</span>
         <span style="font-weight:400;font-size:16px;margin-left:auto;color:#3b6b9b;" id="fileCountDisplay">📁 0 files</span>
     </h1>
-
     <div class="toolbar">
         <div class="file-actions">
             <button id="selectFilesBtn"><i class="fas fa-folder-open"></i> Select Anand Rathi.txt</button>
@@ -186,7 +181,6 @@
         </div>
         <div class="stats" id="rowStats">📊 0 rows</div>
     </div>
-
     <div class="table-wrapper" id="tableWrapper">
         <table id="dataTable">
             <thead>
@@ -204,613 +198,492 @@
         </table>
     </div>
     <div class="footer-note">
-        <span><i class="fas fa-download"></i> Excel: Blue separator (new contract note) · Yellow separator (new party code)</span>
-        <span><i class="fas fa-arrows-alt-h"></i> Auto-fit columns</span>
+        <span><i class="fas fa-download"></i> Blue = new Contract Note · Yellow = new Party Code</span>
+        <span><i class="fas fa-info-circle"></i> Supports Old Detailed + New Summary formats</span>
     </div>
 </div>
+
 <script>
-    (function() {
-        "use strict";
+(function() {
+    "use strict";
 
-        // ---------- state ----------
-        let selectedFiles = [];
-        let parsedRows = [];
+    let selectedFiles = [];
+    let parsedRows = [];
+    let includeBuyBack = false;
 
-        // DOM refs
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.multiple = true;
-        fileInput.accept = '.txt';
-        fileInput.style.display = 'none';
-        document.body.appendChild(fileInput);
+    // DOM
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.multiple = true;
+    fileInput.accept = '.txt';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
 
-        const selectBtn = document.getElementById('selectFilesBtn');
-        const importBtn = document.getElementById('importBtn');
-        const exportExcelBtn = document.getElementById('exportExcelBtn');
-        const exportCsvBtn = document.getElementById('exportCsvBtn');
-        const fileBadge = document.getElementById('selectedFileList');
-        const fileCountSpan = document.getElementById('fileCountDisplay');
-        const rowStats = document.getElementById('rowStats');
-        const tbody = document.getElementById('tableBody');
+    const selectBtn = document.getElementById('selectFilesBtn');
+    const importBtn = document.getElementById('importBtn');
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const fileBadge = document.getElementById('selectedFileList');
+    const fileCountSpan = document.getElementById('fileCountDisplay');
+    const rowStats = document.getElementById('rowStats');
+    const tbody = document.getElementById('tableBody');
 
-        // ---------- helpers ----------
-        function updateFileBadge() {
-            if (selectedFiles.length === 0) {
-                fileBadge.innerHTML = '<i class="fas fa-file-alt"></i> No file selected';
-                fileCountSpan.textContent = '📁 0 files';
-                return;
+    // ---------- UI helpers ----------
+    function updateFileBadge() {
+        if (selectedFiles.length === 0) {
+            fileBadge.innerHTML = '<i class="fas fa-file-alt"></i> No file selected';
+            fileCountSpan.textContent = '📁 0 files';
+            return;
+        }
+        const names = selectedFiles.map(f => f.name).join(', ');
+        const short = names.length > 60 ? names.slice(0, 55) + '…' : names;
+        fileBadge.innerHTML = `<i class="fas fa-file-alt"></i> ${selectedFiles.length} file(s): ${short}`;
+        fileCountSpan.textContent = `📁 ${selectedFiles.length} files`;
+    }
+
+    function updateRowStats() {
+        const count = parsedRows.filter(r => !r.isSeparator).length;
+        rowStats.textContent = `📊 ${count} row${count !== 1 ? 's' : ''}`;
+    }
+
+    // ---------- Utility ----------
+    function isNumericToken(tok) {
+        let t = (tok || '').trim().replace(/,/g, '');
+        if (t.startsWith('(') && t.endsWith(')')) t = '-' + t.slice(1, -1);
+        t = t.replace(/%/g, '');
+        return t !== '' && !isNaN(parseFloat(t)) && isFinite(t);
+    }
+
+    function splitClean(str) {
+        return str.trim().split(/\s+/).filter(s => s.length > 0);
+    }
+
+    function extractNumber(txt) {
+        const m = txt.match(/\d+/);
+        return m ? m[0] : '';
+    }
+
+    function extractDate(txt) {
+        const m = txt.match(/\d{1,2}[-.\/]\d{1,2}[-.\/]\d{2,4}/);
+        return m ? m[0].replace(/[\/.]/g, '-') : '';
+    }
+
+    // ---------- Client Name ----------
+    function extractClientName(text) {
+        const lines = text.split(/\r?\n/);
+        for (let i = 0; i < Math.min(lines.length, 50); i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+            const open = line.indexOf('(');
+            const close = line.indexOf(')');
+            if (open > 0 && close > open) {
+                let candidate = line.substring(0, open).trim();
+                if (isValidClientName(candidate)) return candidate;
             }
-            const names = selectedFiles.map(f => f.name).join(', ');
-            const short = names.length > 60 ? names.slice(0, 55) + '…' : names;
-            fileBadge.innerHTML = `<i class="fas fa-file-alt"></i> ${selectedFiles.length} file(s): ${short}`;
-            fileCountSpan.textContent = `📁 ${selectedFiles.length} files`;
+        }
+        return '';
+    }
+
+    function isValidClientName(name) {
+        if (name.length < 3) return false;
+        if (/^\d+$/.test(name)) return false;
+        const invalid = ['COMPLIANCE OFFICER','MR ','MRS ','MS ','AUTHORISED SIGNATOR','REGISTERED OFFICE',
+            'MEMBER CODE','SEBI','CIN:','GSTIN','PAN ','EMAIL','VISIT US','DEALING OFFICE','RECIPIENT',
+            'CONTRACT NOTE','SETTLEMENT','TRADE DATE','NO.','NORMAL','T1'];
+        for (let term of invalid) {
+            if (name.toUpperCase().includes(term)) return false;
+        }
+        if (name.indexOf(' ') === -1) return false;
+        if (/\d/.test(name)) return false;
+        return true;
+    }
+
+    // ---------- Main Parser (Old Detailed + New Summary) ----------
+    function parseContractNoteText(text, fileName) {
+        text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\uFEFF/g, '').replace(/\u200B/g, '');
+        const lines = text.split('\n');
+
+        let partyCode = '', clientName = '', tradeDate = '', contractNo = '';
+        let settlement = '', exchange = 'NSE', tradeType = 'Normal';
+        let broker = 'Anand Rathi Share and Stock Brokers Limited';
+        let currentISIN = '';
+        let rows = [];
+        let pendingDetailed = [];   // for old format
+
+        // Early Buy Back check
+        if (text.toUpperCase().includes('BUY BACK') && !includeBuyBack) {
+            return { skipped: true, rows: [] };
         }
 
-        function updateRowStats() {
-            const count = parsedRows.filter(r => !r.isSeparator).length;
-            rowStats.textContent = `📊 ${count} row${count !== 1 ? 's' : ''}`;
-        }
+        clientName = extractClientName(text);
 
-        // ---------- parsing core (VBA logic) ----------
-        function extractClientName(text) {
-            const lines = text.split(/\r?\n/);
-            for (let i = 0; i < Math.min(lines.length, 40); i++) {
-                let line = lines[i].trim();
-                if (line.length === 0) continue;
-                const openParen = line.indexOf('(');
-                const closeParen = line.indexOf(')');
-                if (openParen > 0 && closeParen > openParen) {
-                    let candidate = line.substring(0, openParen).trim();
-                    if (isValidClientName(candidate)) return candidate;
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+
+            // ===== Headers =====
+            // Party Code
+            const codeMatch = line.match(/\((GMR[A-Z0-9]+)\)/i);
+            if (codeMatch) {
+                partyCode = codeMatch[1].toUpperCase();
+                if (!clientName) clientName = line.substring(0, line.indexOf('(')).trim();
+            }
+            if (line.toUpperCase().includes('TRADING BACK OFFICE CODE')) {
+                let pc = line.includes(':') ? line.split(':').slice(1).join(':').trim() : '';
+                if (pc) partyCode = pc.split(/\s+/)[0];
+            }
+
+            if (line.toUpperCase().includes('CONTRACT NOTE NO.')) {
+                contractNo = extractNumber(line);
+            }
+            if (line.toUpperCase().includes('TRADE DATE')) {
+                tradeDate = extractDate(line);
+            }
+            if ((line.toUpperCase().includes('SETTLEMENT NO.') || line.toUpperCase().includes('SETTLEMENT DATE')) && !settlement) {
+                settlement = extractNumber(line);
+            }
+            if (line.toUpperCase().includes('BSE CAPITAL')) exchange = 'BSE';
+            if (line.toUpperCase().includes('NCL CAPITAL')) exchange = 'NSE';
+            if (line.toUpperCase().includes('BUY BACK')) tradeType = 'Buy Back';
+            if (line.toUpperCase().includes('OFFER FOR SALE')) tradeType = 'OFS';
+
+            // ===== ISIN (for old detailed) =====
+            if (line.toUpperCase().includes('ISIN:')) {
+                currentISIN = line.replace(/ISIN:/i, '').trim().split(/\s+/)[0] || '';
+                // Flush pending detailed trades with this ISIN
+                for (let p of pendingDetailed) {
+                    rows.push(makeRow(partyCode, exchange, tradeDate, p.scrip, currentISIN, p.side, tradeType,
+                        p.qty, p.rate, p.amt, p.brok, clientName, p.orderNo, p.time, p.tradeNo, p.terminal,
+                        contractNo, settlement, broker, fileName));
                 }
+                pendingDetailed = [];
             }
-            return '';
-        }
 
-        function isValidClientName(name) {
-            if (name.length < 3) return false;
-            if (/^\d+$/.test(name)) return false;
-            const invalid = ['COMPLIANCE OFFICER','MR ','MRS ','MS ','AUTHORISED SIGNATOR','REGISTERED OFFICE',
-                'MEMBER CODE','SEBI','CIN:','GSTIN','PAN ','EMAIL','VISIT US','DEALING OFFICE','RECIPIENT',
-                'CONTRACT NOTE','SETTLEMENT','TRADE DATE','NO.','NORMAL','T1'];
-            for (let term of invalid) {
-                if (name.toUpperCase().includes(term)) return false;
-            }
-            if (name.indexOf(' ') === -1) return false;
-            if (/\d/.test(name)) return false;
-            return true;
-        }
+            // ============================================================
+            // 1. NEW SUMMARY FORMAT  (INE...  qty wap brok ... )
+            // ============================================================
+            if ((line.startsWith('INE') || line.startsWith('INDIA')) && line.includes(' ')) {
+                const parts = splitClean(line);
+                let numStart = -1;
+                for (let k = 1; k < parts.length; k++) {
+                    if (isNumericToken(parts[k]) || parts[k] === '0' || parts[k] === '0.00' || parts[k] === '0.0000') {
+                        numStart = k;
+                        break;
+                    }
+                }
+                if (numStart > 1 && parts.length >= numStart + 12) {
+                    const isin = parts[0];
+                    const scripName = parts.slice(1, numStart).join(' ');
+                    const buyQty  = parseFloat(parts[numStart]) || 0;
+                    const buyWAP  = parseFloat(parts[numStart + 1]) || 0;
+                    const buyBrok = parseFloat(parts[numStart + 2]) || 0;
+                    const buyAmt  = parseFloat(parts[numStart + 4]) || 0;
+                    const sellQty  = parseFloat(parts[numStart + 5]) || 0;
+                    const sellWAP  = parseFloat(parts[numStart + 6]) || 0;
+                    const sellBrok = parseFloat(parts[numStart + 7]) || 0;
+                    const sellAmt  = parseFloat(parts[numStart + 9]) || 0;
 
-        function extractRegex(txt, pattern) {
-            const re = new RegExp(pattern, 'gi');
-            const m = re.exec(txt);
-            if (m && m.length > 1) return m[1].trim();
-            return '';
-        }
-
-        function findContractNote(txt) {
-            return extractRegex(txt, 'CONTRACT\\s*NOTE\\s*NO\\.?\\s*[:\\-]*\\s*([A-Za-z0-9/\\-]+)');
-        }
-
-        function findSettlement(txt) {
-            return extractRegex(txt, 'SETTLEMENT\\s*(?:NO\\.?|NUMBER)?\\s*[:\\-]*\\s*([\\dA-Za-z]+)');
-        }
-
-        function findBrokerName(txt) {
-            const lines = txt.split(/\r?\n/);
-            for (let i = 0; i < Math.min(lines.length, 40); i++) {
-                let l = lines[i].trim();
-                if (l.length === 0) continue;
-                if (/(Broker|Stock Brokers|Share and Stock|Limited)/i.test(l) && l.length < 80) {
-                    let cand = l.replace(/Recipient[:]*/gi, '').replace(/To[:]*/gi, '').replace(/FOR[:]*/gi, '').replace(/Registered Office[:]*/gi, '').trim();
-                    if (cand.length > 3 && !/http/i.test(cand)) {
-                        while (cand.endsWith(',') || cand.endsWith(':') || cand.endsWith('-')) cand = cand.slice(0, -1);
-                        return cand.trim();
+                    if (buyQty > 0) {
+                        rows.push(makeRow(partyCode, exchange, tradeDate, scripName, isin, 'BUY', tradeType,
+                            buyQty, buyWAP, Math.abs(buyAmt), buyBrok, clientName, '-', '-', '-', '-',
+                            contractNo, settlement, broker, fileName));
+                    }
+                    if (sellQty > 0) {
+                        rows.push(makeRow(partyCode, exchange, tradeDate, scripName, isin, 'SELL', tradeType,
+                            sellQty, sellWAP, Math.abs(sellAmt), sellBrok, clientName, '-', '-', '-', '-',
+                            contractNo, settlement, broker, fileName));
                     }
                 }
             }
-            const regex = /([A-Za-z\.\&\-\s]{5,80}Brokers?[^\r\n]*)/i;
-            const m = regex.exec(txt);
-            if (m) return m[1].replace(/Recipient[:]*/gi, '').trim();
-            return '';
-        }
 
-        function isNumericToken(tok) {
-            let t = tok.trim();
-            if (t === '') return false;
-            t = t.replace(/,/g, '');
-            if (t.startsWith('(') && t.endsWith(')')) t = '-' + t.slice(1, -1);
-            t = t.replace(/%/g, '');
-            return !isNaN(parseFloat(t)) && isFinite(t);
-        }
-
-        function splitClean(str) {
-            return str.trim().split(/\s+/).filter(s => s.length > 0);
-        }
-
-        function parseContractNoteText(text, fileName) {
-            text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-            text = text.replace(/\uFEFF/g, '').replace(/\u200B/g, '');
-
-            const lines = text.split('\n');
-            const contractNo = findContractNote(text);
-            const settlementNo = findSettlement(text);
-            const broker = findBrokerName(text);
-            const clientName = extractClientName(text);
-
-            let rows = [];
-            let pending = [];
-            let currISIN = '', tradeDate = '', partyCode = '';
-
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (line.length === 0) continue;
-
-                if (line.toUpperCase().includes('TRADING BACK OFFICE CODE')) {
-                    let pc = line.includes(':') ? line.split(':').slice(1).join(':').trim() : line.replace(/Trading Back office code/i, '').trim();
-                    if (pc.length > 0) partyCode = pc.split(/\s+/)[0];
-                }
-
-                if (line.toUpperCase().includes('TRADE DATE')) {
-                    let tmp = line.replace(/TRADE DATE/i, '').trim();
-                    if (tmp.toUpperCase().includes('SETTLEMENT')) tmp = tmp.substring(0, tmp.toUpperCase().indexOf('SETTLEMENT'));
-                    tradeDate = tmp.trim();
-                    if (tradeDate && !isNaN(Date.parse(tradeDate))) {
-                        const d = new Date(tradeDate);
-                        if (!isNaN(d)) tradeDate = d.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'.');
-                    }
-                }
-
-                if (line.toUpperCase().includes('ISIN:')) {
-                    currISIN = line.replace(/ISIN:/i, '').trim().split(/\s+/)[0] || '';
-                    let foundType = '';
-                    for (let j = i+1; j < Math.min(lines.length, i+10); j++) {
-                        let look = lines[j].trim().toUpperCase();
-                        if (look.includes('DELIVERY')) { foundType = 'Delivery'; break; }
-                        if (look.includes('INTRADAY')) { foundType = 'Intraday'; break; }
-                    }
-                    for (let p of pending) {
-                        let entry = [...p];
-                        if (foundType && !entry[3]) entry[3] = foundType;
-                        let row = {
-                            PartyCode: partyCode || '',
-                            Exchange: entry[0] || '',
-                            TradeDate: tradeDate || '',
-                            ScripName: entry[1] || '',
-                            ISIN: currISIN || '',
-                            SellBuy: entry[2] || '',
-                            TradeType: entry[3] || '',
-                            TradeQty: entry[4] || '',
-                            MarketRate: entry[5] || '',
-                            MarketAmount: entry[6] || '',
-                            Brokerage: entry[7] || '',
-                            ClientName: clientName || '',
-                            OrderNo: entry[8] || '',
-                            TradeTime: entry[9] || '',
-                            TradeNo: entry[10] || '',
-                            TerminalNo: entry[11] || '',
-                            ContractNote: contractNo || '',
-                            Settlement: settlementNo || '',
-                            Broker: entry[12] || broker || '',
-                            SourceFile: fileName || ''
-                        };
-                        rows.push(row);
-                    }
-                    pending = [];
-                }
-
+            // ============================================================
+            // 2. OLD DETAILED FORMAT  (OrderNo ... BUY/SELL ...)
+            // ============================================================
+            else if (isNumericToken(splitClean(line)[0]) && (line.toUpperCase().includes(' BUY ') || line.toUpperCase().includes(' SELL '))) {
                 const tokens = splitClean(line);
-                if (tokens.length > 0 && isNumericToken(tokens[0]) && (line.toUpperCase().includes('BUY') || line.toUpperCase().includes('SELL'))) {
-                    let bsIdx = -1;
-                    for (let k=0; k<tokens.length; k++) {
-                        if (tokens[k].toUpperCase() === 'BUY' || tokens[k].toUpperCase() === 'SELL') { bsIdx = k; break; }
+                let bsIdx = -1;
+                for (let k = 0; k < tokens.length; k++) {
+                    if (tokens[k].toUpperCase() === 'BUY' || tokens[k].toUpperCase() === 'SELL') {
+                        bsIdx = k; break;
                     }
-                    if (bsIdx === -1) continue;
+                }
+                if (bsIdx === -1) continue;
 
-                    const orderNo = tokens[0] || '';
-                    const terminalNo = tokens[1] || '';
-                    const tradeNo = tokens[2] || '';
-                    const tradeTime = tokens[3] || '';
-
-                    let scrip = '';
-                    for (let k=4; k<bsIdx; k++) {
-                        if (k < tokens.length) scrip = scrip ? scrip + ' ' + tokens[k] : tokens[k];
+                const orderNo   = tokens[0] || '';
+                const tradeTime = tokens.find(t => t.includes(':') || /AM|PM/i.test(t)) || '';
+                let tradeNo = '';
+                for (let k = 1; k < bsIdx; k++) {
+                    if (isNumericToken(tokens[k]) && tokens[k].length > 4 && tokens[k] !== orderNo) {
+                        tradeNo = tokens[k]; break;
                     }
+                }
 
-                    const buySell = tokens[bsIdx] || '';
-                    const qty = tokens[bsIdx+1] || '';
-                    const exchange = tokens[tokens.length-1] || '';
-
-                    let marketRate = '', mrIdx = -1;
-                    for (let k=bsIdx+2; k<tokens.length-1; k++) {
-                        if (isNumericToken(tokens[k])) { marketRate = tokens[k]; mrIdx = k; break; }
+                let scrip = '';
+                for (let k = 1; k < bsIdx; k++) {
+                    if (!isNumericToken(tokens[k]) && !tokens[k].includes(':') && !/AM|PM/i.test(tokens[k])) {
+                        scrip += (scrip ? ' ' : '') + tokens[k];
                     }
+                }
 
-                    let marketAmount = '', maIdx = -1;
-                    for (let k=tokens.length-2; k>=bsIdx+2; k--) {
-                        if (isNumericToken(tokens[k])) { marketAmount = tokens[k]; maIdx = k; break; }
+                const side = tokens[bsIdx].toUpperCase();
+                const qty  = parseFloat(tokens[bsIdx + 1]) || 0;
+
+                let ratePos = bsIdx + 2;
+                if (tokens[ratePos] && (tokens[ratePos].toUpperCase() === 'D' || tokens[ratePos].toUpperCase() === 'S')) ratePos++;
+                const rate = parseFloat(tokens[ratePos]) || 0;
+                const brok = parseFloat(tokens[ratePos + 1]) || 0;
+
+                let netAmt = 0;
+                for (let k = tokens.length - 1; k > bsIdx + 2; k--) {
+                    if (isNumericToken(tokens[k])) {
+                        netAmt = parseFloat(tokens[k]);
+                        break;
                     }
+                }
 
-                    let brokerage = '';
-                    if (mrIdx > -1 && mrIdx+1 < tokens.length-1 && isNumericToken(tokens[mrIdx+1])) {
-                        if (mrIdx+1 !== maIdx) brokerage = tokens[mrIdx+1];
-                    }
+                // store temporarily – ISIN will be filled when ISIN: line appears
+                pendingDetailed.push({
+                    scrip, side, qty, rate, amt: Math.abs(netAmt), brok,
+                    orderNo, time: tradeTime, tradeNo, terminal: '-'
+                });
+            }
+        }
 
-                    pending.push([exchange, scrip, buySell, '', qty, marketRate, marketAmount, brokerage, orderNo, tradeTime, tradeNo, terminalNo, '']);
+        // flush any remaining detailed trades
+        for (let p of pendingDetailed) {
+            rows.push(makeRow(partyCode, exchange, tradeDate, p.scrip, currentISIN, p.side, tradeType,
+                p.qty, p.rate, p.amt, p.brok, clientName, p.orderNo, p.time, p.tradeNo, p.terminal,
+                contractNo, settlement, broker, fileName));
+        }
+
+        return { skipped: false, rows };
+    }
+
+    function makeRow(partyCode, exchange, tradeDate, scripName, isin, side, tradeType,
+                     qty, rate, amt, brok, clientName, orderNo, tradeTime, tradeNo, terminal,
+                     contractNo, settlement, broker, sourceFile) {
+        return {
+            PartyCode: partyCode || '',
+            Exchange: exchange || '',
+            TradeDate: tradeDate || '',
+            ScripName: scripName || '',
+            ISIN: isin || '',
+            SellBuy: side || '',
+            TradeType: tradeType || '',
+            TradeQty: qty || '',
+            MarketRate: rate || '',
+            MarketAmount: amt || '',
+            Brokerage: brok || '',
+            ClientName: clientName || '',
+            OrderNo: orderNo || '-',
+            TradeTime: tradeTime || '-',
+            TradeNo: tradeNo || '-',
+            TerminalNo: terminal || '-',
+            ContractNote: contractNo || '',
+            Settlement: settlement || '',
+            Broker: broker || '',
+            SourceFile: sourceFile || '',
+            isSeparator: false
+        };
+    }
+
+    // ---------- Separators (Yellow = Party change, Blue = Contract change) ----------
+    function processWithBoundaries(rows) {
+        if (rows.length === 0) return rows;
+        let result = [];
+        let lastParty = '';
+        let lastContract = '';
+
+        for (let i = 0; i < rows.length; i++) {
+            const r = rows[i];
+
+            if (i > 0) {
+                if (r.PartyCode && lastParty && r.PartyCode !== lastParty) {
+                    result.push({ isSeparator: true, color: 'yellow' });
+                } else if (r.ContractNote && lastContract && r.ContractNote !== lastContract) {
+                    result.push({ isSeparator: true, color: 'blue' });
                 }
             }
 
-            // flush leftover
-            for (let p of pending) {
-                let entry = p;
-                let row = {
-                    PartyCode: partyCode || '',
-                    Exchange: entry[0] || '',
-                    TradeDate: tradeDate || '',
-                    ScripName: entry[1] || '',
-                    ISIN: currISIN || '',
-                    SellBuy: entry[2] || '',
-                    TradeType: entry[3] || '',
-                    TradeQty: entry[4] || '',
-                    MarketRate: entry[5] || '',
-                    MarketAmount: entry[6] || '',
-                    Brokerage: entry[7] || '',
-                    ClientName: clientName || '',
-                    OrderNo: entry[8] || '',
-                    TradeTime: entry[9] || '',
-                    TradeNo: entry[10] || '',
-                    TerminalNo: entry[11] || '',
-                    ContractNote: contractNo || '',
-                    Settlement: settlementNo || '',
-                    Broker: entry[12] || broker || '',
-                    SourceFile: fileName || ''
+            result.push(r);
+            if (r.PartyCode) lastParty = r.PartyCode;
+            if (r.ContractNote) lastContract = r.ContractNote;
+        }
+        return result;
+    }
+
+    // ---------- Import ----------
+    async function importFiles() {
+        if (selectedFiles.length === 0) {
+            alert('Please select at least one .txt file.');
+            return;
+        }
+
+        // Pre-check Buy Back
+        let buyBackCount = 0;
+        for (let f of selectedFiles) {
+            const txt = await f.text();
+            if (txt.toUpperCase().includes('BUY BACK')) buyBackCount++;
+        }
+        includeBuyBack = false;
+        if (buyBackCount > 0) {
+            includeBuyBack = confirm(`There are ${buyBackCount} Buy Back contract note(s).\n\nDo you want to import Buy Back contracts also?\n\nOK = Yes\nCancel = Skip them`);
+        }
+
+        const allRows = [];
+        for (let file of selectedFiles) {
+            const content = await file.text();
+            const result = parseContractNoteText(content, file.name);
+            if (!result.skipped) {
+                allRows.push(...result.rows);
+            }
+        }
+
+        parsedRows = processWithBoundaries(allRows);
+        renderTable(parsedRows);
+        updateRowStats();
+    }
+
+    // ---------- Render ----------
+    function renderTable(rows) {
+        if (rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="20" class="empty-state"><i class="fas fa-inbox"></i> No data imported<br><span style="font-size:13px;">Select Anand Rathi.txt files and click "Import & preview"</span></td></tr>`;
+            return;
+        }
+        let html = '';
+        for (let r of rows) {
+            if (r.isSeparator) {
+                const bg = r.color === 'blue' ? '#c8dcff' : '#ffff96';
+                html += `<tr class="separator-row"><td colspan="20" style="height:4px;padding:0;border:none;background:${bg};"></td></tr>`;
+                continue;
+            }
+            let tradeClass = '';
+            if ((r.TradeType || '').toUpperCase() === 'DELIVERY') tradeClass = 'trade-delivery';
+            else if ((r.TradeType || '').toUpperCase() === 'INTRADAY') tradeClass = 'trade-intraday';
+
+            html += '<tr>';
+            const fields = [
+                r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN,
+                r.SellBuy, r.TradeType, r.TradeQty, r.MarketRate, r.MarketAmount,
+                r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime, r.TradeNo,
+                r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile
+            ];
+            fields.forEach((val, idx) => {
+                if (idx === 6 && tradeClass) html += `<td class="${tradeClass}">${val || ''}</td>`;
+                else if (idx === 19) html += `<td class="source-file" title="${val || ''}">${val || ''}</td>`;
+                else html += `<td>${val || ''}</td>`;
+            });
+            html += '</tr>';
+        }
+        tbody.innerHTML = html;
+    }
+
+    // ---------- Excel Export ----------
+    function exportToExcel() {
+        if (parsedRows.filter(r => !r.isSeparator).length === 0) {
+            alert('No data to export.');
+            return;
+        }
+        const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
+            'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
+            'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
+
+        const data = [headers];
+        for (let r of parsedRows) {
+            if (r.isSeparator) {
+                data.push(new Array(20).fill(''));
+            } else {
+                data.push([
+                    r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN,
+                    r.SellBuy, r.TradeType, r.TradeQty, r.MarketRate, r.MarketAmount,
+                    r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime, r.TradeNo,
+                    r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile
+                ]);
+            }
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // Column widths
+        ws['!cols'] = headers.map(h => ({ wch: Math.min(Math.max(h.length + 4, 12), 35) }));
+
+        // Header style
+        for (let c = 0; c < headers.length; c++) {
+            const cell = XLSX.utils.encode_cell({ r: 0, c });
+            if (ws[cell]) {
+                ws[cell].s = {
+                    font: { bold: true, color: { rgb: "FFFFFF" }, name: "Calibri", sz: 11 },
+                    fill: { fgColor: { rgb: "1E293B" } },
+                    alignment: { horizontal: "center", vertical: "center" }
                 };
-                rows.push(row);
             }
-
-            return rows;
         }
 
-        // ---------- Process rows with VBA boundary logic ----------
-        function processWithBoundaries(rows) {
-            if (rows.length === 0) return rows;
-
-            let result = [];
-            let gLastPartyCode = '';
-            let gLastContractNote = '';
-            let gLastSettlement = '';
-            let rowCount = 5;
-
-            for (let idx = 0; idx < rows.length; idx++) {
-                const r = rows[idx];
-                
-                if (rowCount > 5) {
-                    if (r.PartyCode === gLastPartyCode) {
-                        if (r.ContractNote !== gLastContractNote || r.Settlement !== gLastSettlement) {
-                            result.push({ 
-                                isSeparator: true, 
-                                color: 'blue',
-                                PartyCode: '', Exchange: '', TradeDate: '', ScripName: '', ISIN: '',
-                                SellBuy: '', TradeType: '', TradeQty: '', MarketRate: '', MarketAmount: '',
-                                Brokerage: '', ClientName: '', OrderNo: '', TradeTime: '', TradeNo: '',
-                                TerminalNo: '', ContractNote: '', Settlement: '', Broker: '', SourceFile: ''
-                            });
-                            rowCount++;
-                        }
-                    } else {
-                        result.push({ 
-                            isSeparator: true, 
-                            color: 'yellow',
-                            PartyCode: '', Exchange: '', TradeDate: '', ScripName: '', ISIN: '',
-                            SellBuy: '', TradeType: '', TradeQty: '', MarketRate: '', MarketAmount: '',
-                            Brokerage: '', ClientName: '', OrderNo: '', TradeTime: '', TradeNo: '',
-                            TerminalNo: '', ContractNote: '', Settlement: '', Broker: '', SourceFile: ''
-                        });
-                        rowCount++;
-                    }
+        // Separator colours
+        let rowIdx = 1;
+        for (let r of parsedRows) {
+            if (r.isSeparator) {
+                const color = r.color === 'blue' ? 'C8DCFF' : 'FFFF96';
+                for (let c = 0; c < 20; c++) {
+                    const cell = XLSX.utils.encode_cell({ r: rowIdx, c });
+                    if (!ws[cell]) ws[cell] = { v: '' };
+                    ws[cell].s = { fill: { fgColor: { rgb: color } } };
                 }
-
-                result.push({ ...r, isSeparator: false });
-                
-                gLastContractNote = r.ContractNote;
-                gLastSettlement = r.Settlement;
-                gLastPartyCode = r.PartyCode;
-                rowCount++;
             }
-
-            return result;
+            rowIdx++;
         }
 
-        // ---------- import ----------
-        function importFiles() {
-            if (selectedFiles.length === 0) {
-                alert('Please select at least one .txt file.');
-                return;
-            }
+        XLSX.utils.book_append_sheet(wb, ws, 'ContractNotes');
+        const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+        XLSX.writeFile(wb, `Equity_Contract_Note_${dateStr}.xlsx`);
+    }
 
-            const allRows = [];
-            const promises = selectedFiles.map(file => 
-                file.text().then(content => {
-                    try {
-                        const parsed = parseContractNoteText(content, file.name);
-                        allRows.push(...parsed);
-                    } catch (e) {
-                        console.warn('Parse error', file.name, e);
-                    }
-                })
-            );
-
-            Promise.all(promises).then(() => {
-                parsedRows = processWithBoundaries(allRows);
-                renderTable(parsedRows);
-                updateRowStats();
-                document.querySelector('#dataTable').style.tableLayout = 'auto';
-            }).catch(err => alert('Error reading files: ' + err.message));
+    // ---------- CSV Export ----------
+    function exportCsv() {
+        if (parsedRows.filter(r => !r.isSeparator).length === 0) {
+            alert('No data to export.');
+            return;
         }
+        const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
+            'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
+            'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
 
-        // ---------- render table ----------
-        function renderTable(rows) {
-            if (rows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="20" class="empty-state"><i class="fas fa-inbox"></i> No data imported<br><span style="font-size:13px;">Select Anand Rathi.txt files and click "Import & preview"</span></td></tr>`;
-                return;
-            }
-
-            let html = '';
-            for (let r of rows) {
-                if (r.isSeparator) {
-                    const colorClass = r.color === 'blue' ? 'separator-row-blue' : 'separator-row-yellow';
-                    html += `<tr class="separator-row ${colorClass}"><td colspan="20" style="height:4px;padding:0;border:none;background-color:${r.color === 'blue' ? '#c8dcff' : '#ffff96'};"></td></tr>`;
-                    continue;
-                }
-
-                let tradeTypeClass = '';
-                if (r.TradeType && r.TradeType.toUpperCase() === 'DELIVERY') tradeTypeClass = 'trade-delivery';
-                else if (r.TradeType && r.TradeType.toUpperCase() === 'INTRADAY') tradeTypeClass = 'trade-intraday';
-
-                html += `<tr>`;
-                const fields = [
+        let csv = headers.join(',') + '\n';
+        for (let r of parsedRows) {
+            if (r.isSeparator) {
+                csv += new Array(20).fill('').join(',') + '\n';
+            } else {
+                const row = [
                     r.PartyCode, r.Exchange, r.TradeDate, r.ScripName, r.ISIN,
                     r.SellBuy, r.TradeType, r.TradeQty, r.MarketRate, r.MarketAmount,
                     r.Brokerage, r.ClientName, r.OrderNo, r.TradeTime, r.TradeNo,
                     r.TerminalNo, r.ContractNote, r.Settlement, r.Broker, r.SourceFile
                 ];
-                for (let idx=0; idx<fields.length; idx++) {
-                    let val = fields[idx] || '';
-                    if (idx === 6 && tradeTypeClass) {
-                        html += `<td class="${tradeTypeClass}">${val}</td>`;
-                    } else if (idx === 19) {
-                        html += `<td class="source-file" title="${val}">${val}</td>`;
-                    } else {
-                        html += `<td>${val}</td>`;
-                    }
-                }
-                html += '</tr>';
+                csv += row.map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',') + '\n';
             }
-            tbody.innerHTML = html;
         }
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Equity_Contract_Note_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.csv`;
+        a.click();
+    }
 
-        // ---------- Export to Excel (XLSX) with professional styling ----------
-        function exportToExcel() {
-            if (parsedRows.length === 0) {
-                alert('No data to export. Import files first.');
-                return;
-            }
-
-            const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
-                'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
-                'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
-
-            // Build data array
-            const data = [];
-            
-            // Add headers (row 3)
-            data.push(headers);
-            
-            // Add data rows and separators
-            for (let r of parsedRows) {
-                if (r.isSeparator) {
-                    const emptyRow = new Array(headers.length).fill('');
-                    data.push(emptyRow);
-                } else {
-                    const row = [
-                        r.PartyCode || '', r.Exchange || '', r.TradeDate || '', r.ScripName || '', r.ISIN || '', 
-                        r.SellBuy || '', r.TradeType || '', r.TradeQty || '', r.MarketRate || '', r.MarketAmount || '',
-                        r.Brokerage || '', r.ClientName || '', r.OrderNo || '', r.TradeTime || '', r.TradeNo || '',
-                        r.TerminalNo || '', r.ContractNote || '', r.Settlement || '', r.Broker || '', r.SourceFile || ''
-                    ];
-                    data.push(row);
-                }
-            }
-
-            // Create workbook and worksheet
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(data);
-
-            // Insert 2 empty rows at the top
-            // We need to shift all rows down by 2
-            const wsData = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            const newData = [
-                [], // Row 1 - empty
-                [], // Row 2 - empty
-                ...wsData
-            ];
-            const wsNew = XLSX.utils.aoa_to_sheet(newData);
-
-            // Auto-fit columns
-            const colWidths = headers.map((h, colIdx) => {
-                let maxLen = h.length;
-                for (let rowIdx = 0; rowIdx < newData.length; rowIdx++) {
-                    const row = newData[rowIdx];
-                    if (row && row[colIdx]) {
-                        const val = String(row[colIdx]);
-                        maxLen = Math.max(maxLen, val.length);
-                    }
-                }
-                return { wch: Math.min(Math.max(maxLen + 4, 14), 40) };
-            });
-            wsNew['!cols'] = colWidths;
-
-            // Apply professional styling to header row (now at index 2)
-            const headerRowIdx = 2;
-            for (let col = 0; col < headers.length; col++) {
-                const cellRef = XLSX.utils.encode_cell({ r: headerRowIdx, c: col });
-                if (!wsNew[cellRef]) wsNew[cellRef] = { v: headers[col] };
-                
-                // Professional header styling
-                wsNew[cellRef].s = {
-                    font: { 
-                        bold: true, 
-                        sz: 11, 
-                        color: { rgb: "FFFFFF" },
-                        name: "Calibri"
-                    },
-                    fill: { 
-                        fgColor: { rgb: "1E293B" }  // Dark navy blue
-                    },
-                    alignment: { 
-                        horizontal: "center", 
-                        vertical: "center",
-                        wrapText: true
-                    },
-                    border: {
-                        top: { style: "thick", color: { rgb: "1E293B" } },
-                        bottom: { style: "double", color: { rgb: "1E293B" } },
-                        left: { style: "thin", color: { rgb: "4A5568" } },
-                        right: { style: "thin", color: { rgb: "4A5568" } }
-                    }
-                };
-            }
-
-            // Apply colors to separator rows and style data rows
-            let excelRowIdx = 3; // Start after header (row 0,1,2 = empty, empty, header)
-            for (let r of parsedRows) {
-                if (r.isSeparator) {
-                    const color = r.color === 'blue' ? 'C8DCFF' : 'FFFF96';
-                    for (let col = 0; col < headers.length; col++) {
-                        const cellRef = XLSX.utils.encode_cell({ r: excelRowIdx, c: col });
-                        if (!wsNew[cellRef]) {
-                            wsNew[cellRef] = { v: '' };
-                        }
-                        wsNew[cellRef].s = {
-                            fill: { fgColor: { rgb: color } },
-                            alignment: { horizontal: "center", vertical: "center" }
-                        };
-                    }
-                } else {
-                    // Style data rows with thin borders and alternating row colors
-                    const rowColor = excelRowIdx % 2 === 0 ? 'F8FAFC' : 'FFFFFF';
-                    for (let col = 0; col < headers.length; col++) {
-                        const cellRef = XLSX.utils.encode_cell({ r: excelRowIdx, c: col });
-                        if (wsNew[cellRef]) {
-                            wsNew[cellRef].s = {
-                                fill: { fgColor: { rgb: rowColor } },
-                                border: {
-                                    top: { style: "thin", color: { rgb: "E2E8F0" } },
-                                    bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                                    left: { style: "thin", color: { rgb: "E2E8F0" } },
-                                    right: { style: "thin", color: { rgb: "E2E8F0" } }
-                                },
-                                alignment: { 
-                                    vertical: "center", 
-                                    horizontal: "left",
-                                    indent: 1
-                                },
-                                font: { name: "Calibri", sz: 10 }
-                            };
-                            
-                            // Special formatting for Trade Type column
-                            if (col === 6 && wsNew[cellRef].v) {
-                                const val = String(wsNew[cellRef].v).toUpperCase();
-                                if (val === 'DELIVERY') {
-                                    wsNew[cellRef].s.font.color = { rgb: "0055CC" };
-                                    wsNew[cellRef].s.font.bold = true;
-                                } else if (val === 'INTRADAY') {
-                                    wsNew[cellRef].s.font.color = { rgb: "CC3300" };
-                                    wsNew[cellRef].s.font.bold = true;
-                                }
-                            }
-                        }
-                    }
-                }
-                excelRowIdx++;
-            }
-
-            // Add freeze pane (freeze header row at row 3)
-            wsNew['!freeze'] = { xSplit: 0, ySplit: 3 };
-
-            XLSX.utils.book_append_sheet(wb, wsNew, 'ContractNotes');
-            const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'-');
-            XLSX.writeFile(wb, `Equity_Contract_Note_${dateStr}.xlsx`);
-        }
-
-        // ---------- Export CSV (headers at row 3) ----------
-        function exportCsv() {
-            if (parsedRows.length === 0) {
-                alert('No data to export. Import files first.');
-                return;
-            }
-
-            const headers = ['PartyCode','Exchange','Trade Date','Scrip Name','ISIN','Sell/Buy','Trade Type',
-                'Trade Qty','Market Rate','Market Amount','Brokerage','ClientName','Order No','TRADE_TIME',
-                'Trade No','Terminal No / Batch ID','Contract Note No','Settlement','Broker','Source File'];
-
-            let csv = '';
-            
-            // Row 1 - empty
-            csv += new Array(headers.length).fill('').join(',') + '\n';
-            // Row 2 - empty
-            csv += new Array(headers.length).fill('').join(',') + '\n';
-            // Row 3 - headers
-            csv += headers.join(',') + '\n';
-            
-            // Data rows with blank separator rows
-            for (let r of parsedRows) {
-                if (r.isSeparator) {
-                    // Add a blank row
-                    csv += new Array(headers.length).fill('').join(',') + '\n';
-                } else {
-                    const row = [
-                        r.PartyCode || '', r.Exchange || '', r.TradeDate || '', r.ScripName || '', r.ISIN || '', 
-                        r.SellBuy || '', r.TradeType || '', r.TradeQty || '', r.MarketRate || '', r.MarketAmount || '',
-                        r.Brokerage || '', r.ClientName || '', r.OrderNo || '', r.TradeTime || '', r.TradeNo || '',
-                        r.TerminalNo || '', r.ContractNote || '', r.Settlement || '', r.Broker || '', r.SourceFile || ''
-                    ];
-                    csv += row.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(',') + '\n';
-                }
-            }
-
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'-');
-            a.download = `Equity_Contract_Note_${dateStr}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        // ---------- event binding ----------
-        selectBtn.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', (e) => {
-            const files = e.target.files;
-            if (files.length) {
-                selectedFiles = Array.from(files);
-                updateFileBadge();
-            }
-            fileInput.value = '';
-        });
-
-        importBtn.addEventListener('click', importFiles);
-        exportExcelBtn.addEventListener('click', exportToExcel);
-        exportCsvBtn.addEventListener('click', exportCsv);
-
-        // init
+    // ---------- Events ----------
+    selectBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => {
+        selectedFiles = Array.from(e.target.files);
         updateFileBadge();
-        updateRowStats();
-    })();
+        fileInput.value = '';
+    });
+    importBtn.addEventListener('click', importFiles);
+    exportExcelBtn.addEventListener('click', exportToExcel);
+    exportCsvBtn.addEventListener('click', exportCsv);
+
+    updateFileBadge();
+    updateRowStats();
+})();
 </script>
 </body>
 </html>
