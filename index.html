@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
+    /* ===== CSS Variables ===== */
     :root {
       --navy: #0F172A;
       --navy-light: #1E293B;
@@ -16,7 +17,8 @@
       --emerald: #059669;
       --emerald-hover: #047857;
       --amber: #F59E0B;
-      --amber-hover: #D97706;
+      --red: #DC2626;
+      --red-hover: #B91C1C;
       --slate: #475569;
       --slate-light: #94A3B8;
       --bg: #F1F5F9;
@@ -48,11 +50,7 @@
       --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.6);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: var(--font);
@@ -63,20 +61,10 @@
       min-height: 100vh;
     }
 
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--slate-light);
-      border-radius: 8px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--slate);
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--slate-light); border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--slate); }
 
     /* ===== LEFT NAVIGATION ===== */
     .nav-side {
@@ -117,28 +105,11 @@
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
 
-    .nav-side .logo-section .brand-text {
-      line-height: 1.2;
-    }
+    .nav-side .logo-section .brand-text { line-height: 1.2; }
+    .nav-side .logo-section .brand-text .brand-name { font-weight: 700; font-size: 1rem; letter-spacing: -0.3px; }
+    .nav-side .logo-section .brand-text .brand-sub { font-weight: 400; font-size: 0.6rem; opacity: 0.5; letter-spacing: 0.5px; text-transform: uppercase; }
 
-    .nav-side .logo-section .brand-text .brand-name {
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: -0.3px;
-    }
-
-    .nav-side .logo-section .brand-text .brand-sub {
-      font-weight: 400;
-      font-size: 0.6rem;
-      opacity: 0.5;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .nav-side .nav-items {
-      flex: 1;
-      padding: 12px 12px;
-    }
+    .nav-side .nav-items { flex: 1; padding: 12px 12px; }
 
     .nav-item {
       display: flex;
@@ -152,7 +123,6 @@
       font-size: 0.82rem;
       font-weight: 500;
       margin-bottom: 2px;
-      text-decoration: none;
       border: none;
       background: transparent;
       width: 100%;
@@ -160,57 +130,17 @@
       font-family: var(--font);
     }
 
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.07);
-      color: white;
-    }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.07); color: white; }
+    .nav-item.active { background: rgba(37, 99, 235, 0.25); color: white; box-shadow: inset 3px 0 0 var(--royal); }
+    .nav-item i { width: 20px; font-size: 0.95rem; text-align: center; }
+    .nav-item .badge-nav { margin-left: auto; background: rgba(255, 255, 255, 0.1); padding: 1px 10px; border-radius: 20px; font-size: 0.6rem; font-weight: 600; }
 
-    .nav-item.active {
-      background: rgba(37, 99, 235, 0.25);
-      color: white;
-      box-shadow: inset 3px 0 0 var(--royal);
-    }
-
-    .nav-item i {
-      width: 20px;
-      font-size: 0.95rem;
-      text-align: center;
-    }
-
-    .nav-item .badge-nav {
-      margin-left: auto;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 1px 10px;
-      border-radius: 20px;
-      font-size: 0.6rem;
-      font-weight: 600;
-    }
-
-    .nav-divider {
-      height: 1px;
-      background: rgba(255, 255, 255, 0.06);
-      margin: 8px 16px;
-    }
-
-    .nav-footer {
-      padding: 16px 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 0.65rem;
-      color: rgba(255, 255, 255, 0.3);
-    }
-
-    .nav-footer .version {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .nav-divider { height: 1px; background: rgba(255, 255, 255, 0.06); margin: 8px 16px; }
+    .nav-footer { padding: 16px 20px; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.65rem; color: rgba(255, 255, 255, 0.3); }
+    .nav-footer .version { display: flex; align-items: center; gap: 8px; }
 
     /* ===== MAIN CONTENT ===== */
-    .main-content {
-      flex: 1;
-      padding: 24px 32px 32px 32px;
-      min-width: 0;
-    }
+    .main-content { flex: 1; padding: 24px 32px 32px 32px; min-width: 0; }
 
     .top-bar {
       display: flex;
@@ -221,23 +151,10 @@
       gap: 12px;
     }
 
-    .top-bar .page-title h2 {
-      font-weight: 600;
-      font-size: var(--text-xl);
-      color: var(--text-primary);
-    }
+    .top-bar .page-title h2 { font-weight: 600; font-size: var(--text-xl); color: var(--text-primary); }
+    .top-bar .page-title p { font-size: var(--text-sm); color: var(--text-secondary); }
 
-    .top-bar .page-title p {
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-    }
-
-    .top-bar .actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .top-bar .actions { display: flex; align-items: center; gap: 10px; }
     .top-bar .actions .status-badge {
       display: flex;
       align-items: center;
@@ -250,10 +167,7 @@
       font-weight: 600;
       letter-spacing: 0.3px;
     }
-
-    .top-bar .actions .status-badge i {
-      font-size: 0.5rem;
-    }
+    .top-bar .actions .status-badge i { font-size: 0.5rem; }
 
     .top-bar .actions .theme-toggle {
       background: var(--card-bg);
@@ -269,23 +183,128 @@
       gap: 6px;
       font-family: var(--font);
     }
+    .top-bar .actions .theme-toggle:hover { border-color: var(--royal); color: var(--text-primary); }
+    .top-bar .actions .theme-toggle .fa-sun { display: inline; }
+    .top-bar .actions .theme-toggle .fa-moon { display: none; }
+    [data-theme="dark"] .top-bar .actions .theme-toggle .fa-sun { display: none; }
+    [data-theme="dark"] .top-bar .actions .theme-toggle .fa-moon { display: inline; }
 
-    .top-bar .actions .theme-toggle:hover {
-      border-color: var(--royal);
+    /* ===== SAVE LOCATION SETTINGS ===== */
+    .save-location-bar {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 12px 20px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .save-location-bar .location-label {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .save-location-bar .location-label i { color: var(--royal); }
+
+    .save-location-bar .location-path {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
       color: var(--text-primary);
+      border: 1px solid var(--border);
+      font-family: var(--font);
+      cursor: default;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .top-bar .actions .theme-toggle .fa-sun {
-      display: inline;
+    .save-location-bar .location-path .folder-icon { margin-right: 6px; }
+    .save-location-bar .location-path .path-text { font-weight: 500; }
+    .save-location-bar .location-path .hint-text { color: var(--text-secondary); font-size: var(--text-xs); }
+
+    .save-location-bar .btn-location {
+      padding: 6px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--royal);
+      color: white;
+      cursor: pointer;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      transition: all 0.15s;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .top-bar .actions .theme-toggle .fa-moon {
-      display: none;
+    .save-location-bar .btn-location:hover { background: var(--royal-hover); }
+
+    .save-location-bar .location-status {
+      font-size: var(--text-xs);
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
-    [data-theme="dark"] .top-bar .actions .theme-toggle .fa-sun {
-      display: none;
+    .save-location-bar .location-status.active { color: var(--emerald); }
+    .save-location-bar .location-status.info { color: var(--royal); }
+    .save-location-bar .location-status.warning { color: var(--amber); }
+
+    [data-theme="dark"] .save-location-bar .location-path { background: var(--navy-light); }
+
+    @media (max-width: 720px) {
+      .save-location-bar { flex-direction: column; align-items: stretch; }
+      .save-location-bar .location-path { min-width: unset; }
     }
-    [data-theme="dark"] .top-bar .actions .theme-toggle .fa-moon {
-      display: inline;
+
+    /* ===== SECURITY DISCLAIMER BANNER ===== */
+    .security-banner {
+      background: linear-gradient(135deg, #065F46, #047857);
+      border-radius: var(--radius);
+      padding: 16px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.2);
+    }
+
+    .security-banner .shield-icon { font-size: 28px; color: #6EE7B7; flex-shrink: 0; }
+    .security-banner .banner-content { flex: 1; color: white; }
+    .security-banner .banner-content .banner-title { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+    .security-banner .banner-content .banner-title i { color: #6EE7B7; }
+    .security-banner .banner-content .banner-text { font-size: 0.82rem; opacity: 0.9; margin-top: 2px; line-height: 1.5; }
+    .security-banner .banner-content .banner-text strong { color: #A7F3D0; }
+    .security-banner .banner-badge {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 4px 14px;
+      border-radius: 40px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #A7F3D0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+    }
+
+    [data-theme="dark"] .security-banner { background: linear-gradient(135deg, #065F46, #047857); }
+
+    @media (max-width: 720px) {
+      .security-banner { flex-direction: column; align-items: flex-start; padding: 14px 18px; }
+      .security-banner .banner-badge { align-self: flex-start; }
     }
 
     /* ===== TAB NAVIGATION ===== */
@@ -318,39 +337,14 @@
       font-family: var(--font);
     }
 
-    .tab-btn:hover {
-      background: var(--bg);
-      color: var(--text-primary);
-    }
+    .tab-btn:hover { background: var(--bg); color: var(--text-primary); }
+    .tab-btn.active { background: var(--royal); color: white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25); }
+    .tab-btn .tab-icon { font-size: 1rem; }
+    .tab-btn .tab-badge { background: rgba(255, 255, 255, 0.2); padding: 0 8px; border-radius: 20px; font-size: 0.6rem; }
+    .tab-btn.active .tab-badge { background: rgba(255, 255, 255, 0.25); }
 
-    .tab-btn.active {
-      background: var(--royal);
-      color: white;
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-    }
-
-    .tab-btn .tab-icon {
-      font-size: 1rem;
-    }
-
-    .tab-btn .tab-badge {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 0 8px;
-      border-radius: 20px;
-      font-size: 0.6rem;
-    }
-
-    .tab-btn.active .tab-badge {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     /* ===== STATS DASHBOARD ===== */
     .stats-grid {
@@ -372,125 +366,37 @@
       cursor: default;
     }
 
-    .stat-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-hover);
-    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    .stat-card .stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .stat-card .stat-icon { font-size: 1.3rem; opacity: 0.7; }
+    .stat-card .stat-label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); font-weight: 600; }
+    .stat-card .stat-value { font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+    .stat-card .stat-trend { font-size: var(--text-xs); font-weight: 600; color: var(--emerald); margin-top: 2px; }
+    .stat-card .stat-trend.down { color: #DC2626; }
 
-    .stat-card .stat-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 6px;
-    }
+    .stat-card.grad-blue { background: linear-gradient(145deg, #1E3A5F, #1A365D); border-color: transparent; }
+    .stat-card.grad-blue .stat-label, .stat-card.grad-blue .stat-value { color: white; }
+    .stat-card.grad-blue .stat-icon { color: #60A5FA; opacity: 1; }
+    .stat-card.grad-blue .stat-trend { color: #93C5FD; }
 
-    .stat-card .stat-icon {
-      font-size: 1.3rem;
-      opacity: 0.7;
-    }
+    .stat-card.grad-emerald { background: linear-gradient(145deg, #065F46, #047857); border-color: transparent; }
+    .stat-card.grad-emerald .stat-label, .stat-card.grad-emerald .stat-value { color: white; }
+    .stat-card.grad-emerald .stat-icon { color: #34D399; opacity: 1; }
+    .stat-card.grad-emerald .stat-trend { color: #6EE7B7; }
 
-    .stat-card .stat-label {
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-secondary);
-      font-weight: 600;
-    }
+    .stat-card.grad-amber { background: linear-gradient(145deg, #78350F, #92400E); border-color: transparent; }
+    .stat-card.grad-amber .stat-label, .stat-card.grad-amber .stat-value { color: white; }
+    .stat-card.grad-amber .stat-icon { color: #FBBF24; opacity: 1; }
+    .stat-card.grad-amber .stat-trend { color: #FCD34D; }
 
-    .stat-card .stat-value {
-      font-size: var(--text-2xl);
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.2;
-    }
+    .stat-card.grad-purple { background: linear-gradient(145deg, #4C1D95, #5B21B6); border-color: transparent; }
+    .stat-card.grad-purple .stat-label, .stat-card.grad-purple .stat-value { color: white; }
+    .stat-card.grad-purple .stat-icon { color: #A78BFA; opacity: 1; }
+    .stat-card.grad-purple .stat-trend { color: #C4B5FD; }
 
-    .stat-card .stat-trend {
-      font-size: var(--text-xs);
-      font-weight: 600;
-      color: var(--emerald);
-      margin-top: 2px;
-    }
-
-    .stat-card .stat-trend.down {
-      color: #DC2626;
-    }
-
-    .stat-card.grad-blue {
-      background: linear-gradient(145deg, #1E3A5F, #1A365D);
-      border-color: transparent;
-    }
-    .stat-card.grad-blue .stat-label,
-    .stat-card.grad-blue .stat-value {
-      color: white;
-    }
-    .stat-card.grad-blue .stat-icon {
-      color: #60A5FA;
-      opacity: 1;
-    }
-    .stat-card.grad-blue .stat-trend {
-      color: #93C5FD;
-    }
-
-    .stat-card.grad-emerald {
-      background: linear-gradient(145deg, #065F46, #047857);
-      border-color: transparent;
-    }
-    .stat-card.grad-emerald .stat-label,
-    .stat-card.grad-emerald .stat-value {
-      color: white;
-    }
-    .stat-card.grad-emerald .stat-icon {
-      color: #34D399;
-      opacity: 1;
-    }
-    .stat-card.grad-emerald .stat-trend {
-      color: #6EE7B7;
-    }
-
-    .stat-card.grad-amber {
-      background: linear-gradient(145deg, #78350F, #92400E);
-      border-color: transparent;
-    }
-    .stat-card.grad-amber .stat-label,
-    .stat-card.grad-amber .stat-value {
-      color: white;
-    }
-    .stat-card.grad-amber .stat-icon {
-      color: #FBBF24;
-      opacity: 1;
-    }
-    .stat-card.grad-amber .stat-trend {
-      color: #FCD34D;
-    }
-
-    .stat-card.grad-purple {
-      background: linear-gradient(145deg, #4C1D95, #5B21B6);
-      border-color: transparent;
-    }
-    .stat-card.grad-purple .stat-label,
-    .stat-card.grad-purple .stat-value {
-      color: white;
-    }
-    .stat-card.grad-purple .stat-icon {
-      color: #A78BFA;
-      opacity: 1;
-    }
-    .stat-card.grad-purple .stat-trend {
-      color: #C4B5FD;
-    }
-
-    .stat-card.grad-rose {
-      background: linear-gradient(145deg, #7F1D1D, #991B1B);
-      border-color: transparent;
-    }
-    .stat-card.grad-rose .stat-label,
-    .stat-card.grad-rose .stat-value {
-      color: white;
-    }
-    .stat-card.grad-rose .stat-icon {
-      color: #F87171;
-      opacity: 1;
-    }
+    .stat-card.grad-rose { background: linear-gradient(145deg, #7F1D1D, #991B1B); border-color: transparent; }
+    .stat-card.grad-rose .stat-label, .stat-card.grad-rose .stat-value { color: white; }
+    .stat-card.grad-rose .stat-icon { color: #F87171; opacity: 1; }
 
     /* ===== PROGRESS ===== */
     .progress-container {
@@ -503,61 +409,15 @@
       box-shadow: var(--shadow);
     }
 
-    .progress-container.active {
-      display: block;
-    }
-
-    .progress-container .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-
-    .progress-container .progress-track {
-      height: 6px;
-      background: var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-container .progress-track .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--royal), var(--emerald));
-      border-radius: 10px;
-      width: 0%;
-      transition: width 0.4s ease;
-    }
-
-    .progress-container .progress-steps {
-      display: flex;
-      gap: 16px;
-      margin-top: 8px;
-      font-size: var(--text-xs);
-      color: var(--text-secondary);
-    }
-
-    .progress-container .progress-steps .step {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .progress-container .progress-steps .step .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: 0.3s;
-    }
-
-    .progress-container .progress-steps .step .dot.active {
-      background: var(--royal);
-    }
-    .progress-container .progress-steps .step .dot.done {
-      background: var(--emerald);
-    }
+    .progress-container.active { display: block; }
+    .progress-container .progress-label { display: flex; justify-content: space-between; font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: 6px; }
+    .progress-container .progress-track { height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
+    .progress-container .progress-track .progress-fill { height: 100%; background: linear-gradient(90deg, var(--royal), var(--emerald)); border-radius: 10px; width: 0%; transition: width 0.4s ease; }
+    .progress-container .progress-steps { display: flex; gap: 16px; margin-top: 8px; font-size: var(--text-xs); color: var(--text-secondary); }
+    .progress-container .progress-steps .step { display: flex; align-items: center; gap: 4px; }
+    .progress-container .progress-steps .step .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: 0.3s; }
+    .progress-container .progress-steps .step .dot.active { background: var(--royal); }
+    .progress-container .progress-steps .step .dot.done { background: var(--emerald); }
 
     /* ===== RIBBON / TOOLBAR ===== */
     .ribbon {
@@ -580,19 +440,8 @@
       padding-right: 10px;
       border-right: 1px solid var(--border);
     }
-
-    .ribbon-group:last-child {
-      border-right: none;
-    }
-
-    .ribbon-group .group-label {
-      font-size: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-secondary);
-      font-weight: 700;
-      margin-right: 4px;
-    }
+    .ribbon-group:last-child { border-right: none; }
+    .ribbon-group .group-label { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); font-weight: 700; margin-right: 4px; }
 
     .ribbon-btn {
       background: transparent;
@@ -610,36 +459,82 @@
       font-family: var(--font);
     }
 
-    .ribbon-btn:hover {
+    .ribbon-btn:hover { background: var(--bg); color: var(--text-primary); }
+    .ribbon-btn.primary { background: var(--royal); color: white; }
+    .ribbon-btn.primary:hover { background: var(--royal-hover); }
+    .ribbon-btn.success { background: var(--emerald); color: white; }
+    .ribbon-btn.success:hover { background: var(--emerald-hover); }
+    .ribbon-btn.danger { color: var(--red); }
+    .ribbon-btn.danger:hover { background: #FEE2E2; color: var(--red-hover); }
+    .ribbon-btn i { font-size: 0.8rem; }
+
+    /* ===== DELETE MODAL ===== */
+    .delete-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .delete-modal-overlay.active { display: flex; }
+
+    .delete-modal-content {
+      background: var(--card-bg);
+      border-radius: 24px;
+      max-width: 500px;
+      width: 100%;
+      padding: 0;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.30);
+      animation: modalFadeIn 0.3s ease;
+    }
+
+    .delete-modal-header {
+      padding: 20px 24px 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .delete-modal-header h3 { font-size: var(--text-lg); font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+    .delete-modal-header h3 i { color: var(--red); }
+    .delete-modal-header .modal-close { background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .delete-modal-header .modal-close:hover { background: var(--border); }
+
+    .delete-modal-body { padding: 20px 24px 24px 24px; }
+
+    .delete-modal-body .contract-info {
       background: var(--bg);
-      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
     }
 
-    .ribbon-btn.primary {
-      background: var(--royal);
-      color: white;
-    }
-    .ribbon-btn.primary:hover {
-      background: var(--royal-hover);
-    }
+    .delete-modal-body .contract-info .info-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: var(--text-sm); }
+    .delete-modal-body .contract-info .info-row .label { color: var(--text-secondary); font-weight: 500; }
+    .delete-modal-body .contract-info .info-row .value { color: var(--text-primary); font-weight: 600; }
 
-    .ribbon-btn.success {
-      background: var(--emerald);
-      color: white;
-    }
-    .ribbon-btn.success:hover {
-      background: var(--emerald-hover);
-    }
+    .delete-modal-body .warning-text { color: var(--red); font-size: var(--text-sm); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .delete-modal-body .warning-text i { font-size: 1.1rem; }
 
-    .ribbon-btn.danger {
-      color: #DC2626;
-    }
-    .ribbon-btn.danger:hover {
-      background: #FEE2E2;
-    }
+    .delete-modal-body .btn-group { display: flex; gap: 10px; justify-content: flex-end; }
+    .delete-modal-body .btn-group .btn-cancel { padding: 8px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; cursor: pointer; font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); transition: 0.2s; font-family: var(--font); }
+    .delete-modal-body .btn-group .btn-cancel:hover { background: var(--bg); }
+    .delete-modal-body .btn-group .btn-delete { padding: 8px 20px; border-radius: var(--radius-sm); border: none; background: var(--red); color: white; cursor: pointer; font-size: var(--text-sm); font-weight: 600; transition: 0.2s; font-family: var(--font); display: flex; align-items: center; gap: 6px; }
+    .delete-modal-body .btn-group .btn-delete:hover { background: var(--red-hover); }
 
-    .ribbon-btn i {
-      font-size: 0.8rem;
+    @media (max-width: 480px) {
+      .delete-modal-body .btn-group { flex-direction: column; }
+      .delete-modal-body .btn-group .btn-cancel,
+      .delete-modal-body .btn-group .btn-delete { justify-content: center; }
     }
 
     /* ===== SEARCH & FILTER ===== */
@@ -663,32 +558,11 @@
       transition: 0.2s;
     }
 
-    .search-bar .search-box:focus-within {
-      border-color: var(--royal);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
+    .search-bar .search-box:focus-within { border-color: var(--royal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+    .search-bar .search-box i { color: var(--text-secondary); font-size: var(--text-sm); }
+    .search-bar .search-box input { border: none; background: transparent; padding: 9px 12px; font-size: var(--text-sm); width: 100%; outline: none; color: var(--text-primary); font-family: var(--font); }
 
-    .search-bar .search-box i {
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
-    }
-
-    .search-bar .search-box input {
-      border: none;
-      background: transparent;
-      padding: 9px 12px;
-      font-size: var(--text-sm);
-      width: 100%;
-      outline: none;
-      color: var(--text-primary);
-      font-family: var(--font);
-    }
-
-    .search-bar .filter-chips {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
+    .search-bar .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 
     .filter-chip {
       padding: 5px 14px;
@@ -703,28 +577,10 @@
       font-family: var(--font);
     }
 
-    .filter-chip:hover {
-      border-color: var(--royal);
-      color: var(--text-primary);
-    }
-
-    .filter-chip.active {
-      background: var(--royal);
-      color: white;
-      border-color: var(--royal);
-    }
-
-    .filter-chip .count {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 0 6px;
-      border-radius: 10px;
-      font-size: 0.55rem;
-      margin-left: 4px;
-    }
-
-    .filter-chip.active .count {
-      background: rgba(255, 255, 255, 0.25);
-    }
+    .filter-chip:hover { border-color: var(--royal); color: var(--text-primary); }
+    .filter-chip.active { background: var(--royal); color: white; border-color: var(--royal); }
+    .filter-chip .count { background: rgba(255, 255, 255, 0.2); padding: 0 6px; border-radius: 10px; font-size: 0.55rem; margin-left: 4px; }
+    .filter-chip.active .count { background: rgba(255, 255, 255, 0.25); }
 
     /* ===== TABLE ===== */
     .table-container {
@@ -735,10 +591,7 @@
       box-shadow: var(--shadow);
     }
 
-    .table-wrapper {
-      overflow-x: auto;
-      max-height: 58vh;
-    }
+    .table-wrapper { overflow-x: auto; max-height: 58vh; }
 
     table {
       width: 100%;
@@ -765,38 +618,12 @@
       user-select: none;
     }
 
-    th:last-child {
-      border-right: none;
-    }
-
-    th .sort-icon {
-      opacity: 0.4;
-      margin-left: 4px;
-      font-size: 0.6rem;
-    }
-
-    th:hover .sort-icon {
-      opacity: 0.8;
-    }
-
-    th:first-child {
-      position: sticky;
-      left: 0;
-      z-index: 11;
-      background: var(--navy);
-    }
-
-    td:first-child {
-      position: sticky;
-      left: 0;
-      z-index: 5;
-      background: var(--card-bg);
-      font-weight: 500;
-    }
-
-    tr:hover td:first-child {
-      background: var(--bg);
-    }
+    th:last-child { border-right: none; }
+    th .sort-icon { opacity: 0.4; margin-left: 4px; font-size: 0.6rem; }
+    th:hover .sort-icon { opacity: 0.8; }
+    th:first-child { position: sticky; left: 0; z-index: 11; background: var(--navy); }
+    td:first-child { position: sticky; left: 0; z-index: 5; background: var(--card-bg); font-weight: 500; }
+    tr:hover td:first-child { background: var(--bg); }
 
     td {
       padding: 8px 12px;
@@ -808,43 +635,17 @@
       color: var(--text-primary);
     }
 
-    tr:hover td {
-      background: var(--bg);
-    }
+    tr:hover td { background: var(--bg); }
+    tr:nth-child(even) td { background: rgba(0, 0, 0, 0.01); }
+    tr:nth-child(even):hover td { background: var(--bg); }
 
-    tr:nth-child(even) td {
-      background: rgba(0, 0, 0, 0.01);
-    }
-
-    tr:nth-child(even):hover td {
-      background: var(--bg);
-    }
-
-    .source-file {
-      color: var(--text-secondary);
-      font-size: var(--text-xs);
-    }
+    .source-file { color: var(--text-secondary); font-size: var(--text-xs); }
 
     /* Separator rows */
-    .sep-blue td {
-      background: #DBEAFE !important;
-      height: 4px;
-      padding: 0;
-      border: none;
-    }
-    .sep-yellow td {
-      background: #FEF3C7 !important;
-      height: 4px;
-      padding: 0;
-      border: none;
-    }
-
-    [data-theme="dark"] .sep-blue td {
-      background: #1E3A5F !important;
-    }
-    [data-theme="dark"] .sep-yellow td {
-      background: #78350F !important;
-    }
+    .sep-blue td { background: #DBEAFE !important; height: 4px; padding: 0; border: none; }
+    .sep-yellow td { background: #FEF3C7 !important; height: 4px; padding: 0; border: none; }
+    [data-theme="dark"] .sep-blue td { background: #1E3A5F !important; }
+    [data-theme="dark"] .sep-yellow td { background: #78350F !important; }
 
     /* Badges */
     .badge-delivery {
@@ -858,10 +659,7 @@
       background: #DBEAFE;
       color: #1D4ED8;
     }
-    .badge-delivery i {
-      color: #3B82F6;
-      font-size: 0.5rem;
-    }
+    .badge-delivery i { color: #3B82F6; font-size: 0.5rem; }
 
     .badge-intraday {
       display: inline-flex;
@@ -874,52 +672,18 @@
       background: #FEE2E2;
       color: #DC2626;
     }
-    .badge-intraday i {
-      color: #EF4444;
-      font-size: 0.5rem;
-    }
+    .badge-intraday i { color: #EF4444; font-size: 0.5rem; }
 
-    .badge-buy {
-      color: #059669;
-      font-weight: 600;
-    }
-    .badge-sell {
-      color: #DC2626;
-      font-weight: 600;
-    }
+    .badge-buy { color: #059669; font-weight: 600; }
+    .badge-sell { color: #DC2626; font-weight: 600; }
 
-    [data-theme="dark"] .badge-delivery {
-      background: #1E3A5F;
-      color: #60A5FA;
-    }
-    [data-theme="dark"] .badge-intraday {
-      background: #7F1D1D;
-      color: #F87171;
-    }
+    [data-theme="dark"] .badge-delivery { background: #1E3A5F; color: #60A5FA; }
+    [data-theme="dark"] .badge-intraday { background: #7F1D1D; color: #F87171; }
 
-    .empty-state {
-      padding: 60px 20px;
-      text-align: center;
-      color: var(--text-secondary);
-    }
-
-    .empty-state .empty-icon {
-      font-size: 56px;
-      color: var(--border);
-      margin-bottom: 16px;
-      display: block;
-    }
-
-    .empty-state h3 {
-      font-weight: 600;
-      font-size: var(--text-lg);
-      color: var(--text-primary);
-    }
-
-    .empty-state p {
-      font-size: var(--text-base);
-      margin-top: 4px;
-    }
+    .empty-state { padding: 60px 20px; text-align: center; color: var(--text-secondary); }
+    .empty-state .empty-icon { font-size: 56px; color: var(--border); margin-bottom: 16px; display: block; }
+    .empty-state h3 { font-weight: 600; font-size: var(--text-lg); color: var(--text-primary); }
+    .empty-state p { font-size: var(--text-base); margin-top: 4px; }
 
     .empty-state .drop-zone {
       margin-top: 20px;
@@ -933,22 +697,9 @@
       cursor: pointer;
     }
 
-    .empty-state .drop-zone:hover {
-      border-color: var(--royal);
-      background: rgba(37, 99, 235, 0.04);
-    }
-
-    .empty-state .drop-zone.drag-over {
-      border-color: var(--royal);
-      background: rgba(37, 99, 235, 0.08);
-    }
-
-    .empty-state .drop-zone i {
-      font-size: 28px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-      display: block;
-    }
+    .empty-state .drop-zone:hover { border-color: var(--royal); background: rgba(37, 99, 235, 0.04); }
+    .empty-state .drop-zone.drag-over { border-color: var(--royal); background: rgba(37, 99, 235, 0.08); }
+    .empty-state .drop-zone i { font-size: 28px; color: var(--text-secondary); margin-bottom: 8px; display: block; }
 
     .toast-container {
       position: fixed;
@@ -974,54 +725,20 @@
       gap: 12px;
     }
 
-    .toast .toast-icon {
-      font-size: 1.1rem;
-      margin-top: 1px;
-    }
+    .toast .toast-icon { font-size: 1.1rem; margin-top: 1px; }
+    .toast .toast-content { flex: 1; }
+    .toast .toast-content .toast-title { font-weight: 600; font-size: var(--text-sm); color: var(--text-primary); }
+    .toast .toast-content .toast-msg { font-size: var(--text-sm); color: var(--text-secondary); }
+    .toast .toast-close { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; padding: 4px; }
 
-    .toast .toast-content {
-      flex: 1;
-    }
-
-    .toast .toast-content .toast-title {
-      font-weight: 600;
-      font-size: var(--text-sm);
-      color: var(--text-primary);
-    }
-
-    .toast .toast-content .toast-msg {
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-    }
-
-    .toast .toast-close {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-size: 0.9rem;
-      padding: 4px;
-    }
-
-    .toast.success .toast-icon {
-      color: var(--emerald);
-    }
-    .toast.error .toast-icon {
-      color: #DC2626;
-    }
-    .toast.info .toast-icon {
-      color: var(--royal);
-    }
+    .toast.success .toast-icon { color: var(--emerald); }
+    .toast.error .toast-icon { color: #DC2626; }
+    .toast.info .toast-icon { color: var(--royal); }
+    .toast.warning .toast-icon { color: var(--amber); }
 
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
     .app-footer {
@@ -1037,38 +754,13 @@
       border-top: 1px solid var(--border);
     }
 
-    .app-footer .footer-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    .app-footer .footer-left { display: flex; align-items: center; gap: 16px; }
+    .app-footer .footer-left .dot-status { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); display: inline-block; }
+    .app-footer .footer-left .dot-status.warning { background: var(--amber); }
 
-    .app-footer .footer-left .dot-status {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--emerald);
-      display: inline-block;
-    }
-
-    .app-footer .footer-left .dot-status.warning {
-      background: var(--amber);
-    }
-
-    .app-footer .footer-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .app-footer .footer-right a {
-      color: var(--royal);
-      text-decoration: none;
-    }
-
-    .app-footer .footer-right a:hover {
-      text-decoration: underline;
-    }
+    .app-footer .footer-right { display: flex; align-items: center; gap: 12px; }
+    .app-footer .footer-right a { color: var(--royal); text-decoration: none; }
+    .app-footer .footer-right a:hover { text-decoration: underline; }
 
     .modal-overlay {
       display: none;
@@ -1085,9 +777,7 @@
       padding: 20px;
     }
 
-    .modal-overlay.active {
-      display: flex;
-    }
+    .modal-overlay.active { display: flex; }
 
     .modal-content {
       background: var(--card-bg);
@@ -1102,14 +792,8 @@
     }
 
     @keyframes modalFadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.95) translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .modal-header {
@@ -1125,18 +809,8 @@
       z-index: 10;
     }
 
-    .modal-header h2 {
-      font-size: var(--text-lg);
-      font-weight: 600;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .modal-header h2 i {
-      color: var(--royal);
-    }
+    .modal-header h2 { font-size: var(--text-lg); font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 12px; }
+    .modal-header h2 i { color: var(--royal); }
 
     .modal-close {
       background: var(--bg);
@@ -1152,66 +826,19 @@
       justify-content: center;
       transition: 0.2s;
     }
+    .modal-close:hover { background: var(--border); color: var(--text-primary); }
 
-    .modal-close:hover {
-      background: var(--border);
-      color: var(--text-primary);
-    }
+    .modal-body { padding: 24px 32px 32px 32px; }
+    .modal-body h3 { font-size: var(--text-base); font-weight: 600; color: var(--text-primary); margin: 20px 0 10px 0; display: flex; align-items: center; gap: 10px; }
+    .modal-body h3:first-of-type { margin-top: 0; }
+    .modal-body h3 i { color: var(--royal); width: 20px; }
 
-    .modal-body {
-      padding: 24px 32px 32px 32px;
-    }
+    .modal-body p { color: var(--text-secondary); line-height: 1.7; margin-bottom: 10px; font-size: var(--text-base); }
 
-    .modal-body h3 {
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 20px 0 10px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .modal-body h3:first-of-type {
-      margin-top: 0;
-    }
-
-    .modal-body h3 i {
-      color: var(--royal);
-      width: 20px;
-    }
-
-    .modal-body p {
-      color: var(--text-secondary);
-      line-height: 1.7;
-      margin-bottom: 10px;
-      font-size: var(--text-base);
-    }
-
-    .modal-body ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .modal-body ul li {
-      padding: 6px 12px 6px 32px;
-      position: relative;
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-body ul li:last-child {
-      border-bottom: none;
-    }
-
-    .modal-body ul li::before {
-      content: "▸";
-      position: absolute;
-      left: 8px;
-      color: var(--royal);
-      font-weight: 600;
-    }
+    .modal-body ul { list-style: none; padding: 0; }
+    .modal-body ul li { padding: 6px 12px 6px 32px; position: relative; color: var(--text-secondary); font-size: var(--text-sm); border-bottom: 1px solid var(--border); }
+    .modal-body ul li:last-child { border-bottom: none; }
+    .modal-body ul li::before { content: "▸"; position: absolute; left: 8px; color: var(--royal); font-weight: 600; }
 
     .modal-body .highlight-box {
       background: var(--bg);
@@ -1230,47 +857,17 @@
       margin: 2px 4px 2px 0;
     }
 
-    .tag-blue {
-      background: #DBEAFE;
-      color: #1D4ED8;
-    }
-    .tag-yellow {
-      background: #FEF3C7;
-      color: #92400E;
-    }
-    .tag-green {
-      background: #D1FAE5;
-      color: #065F46;
-    }
-    .tag-red {
-      background: #FEE2E2;
-      color: #991B1B;
-    }
-    .tag-purple {
-      background: #EDE9FE;
-      color: #5B21B6;
-    }
+    .tag-blue { background: #DBEAFE; color: #1D4ED8; }
+    .tag-yellow { background: #FEF3C7; color: #92400E; }
+    .tag-green { background: #D1FAE5; color: #065F46; }
+    .tag-red { background: #FEE2E2; color: #991B1B; }
+    .tag-purple { background: #EDE9FE; color: #5B21B6; }
 
-    [data-theme="dark"] .tag-blue {
-      background: #1E3A5F;
-      color: #60A5FA;
-    }
-    [data-theme="dark"] .tag-yellow {
-      background: #78350F;
-      color: #FCD34D;
-    }
-    [data-theme="dark"] .tag-green {
-      background: #065F46;
-      color: #6EE7B7;
-    }
-    [data-theme="dark"] .tag-red {
-      background: #7F1D1D;
-      color: #F87171;
-    }
-    [data-theme="dark"] .tag-purple {
-      background: #4C1D95;
-      color: #A78BFA;
-    }
+    [data-theme="dark"] .tag-blue { background: #1E3A5F; color: #60A5FA; }
+    [data-theme="dark"] .tag-yellow { background: #78350F; color: #FCD34D; }
+    [data-theme="dark"] .tag-green { background: #065F46; color: #6EE7B7; }
+    [data-theme="dark"] .tag-red { background: #7F1D1D; color: #F87171; }
+    [data-theme="dark"] .tag-purple { background: #4C1D95; color: #A78BFA; }
 
     .modal-body .steps-grid {
       display: grid;
@@ -1301,163 +898,62 @@
       font-size: var(--text-sm);
     }
 
-    .modal-body .step-item p {
-      font-size: var(--text-sm);
-      margin: 0;
-      color: var(--text-secondary);
-    }
-
-    .modal-body .step-item .step-icon {
-      font-size: 1.2rem;
-      margin-bottom: 4px;
-      display: block;
-    }
+    .modal-body .step-item p { font-size: var(--text-sm); margin: 0; color: var(--text-secondary); }
+    .modal-body .step-item .step-icon { font-size: 1.2rem; margin-bottom: 4px; display: block; }
 
     @media (max-width: 1024px) {
-      .nav-side {
-        width: 64px;
-        padding: 0;
-      }
-      .nav-side .logo-section .brand-text {
-        display: none;
-      }
-      .nav-side .logo-section {
-        justify-content: center;
-        padding: 16px 8px;
-      }
-      .nav-item span {
-        display: none;
-      }
-      .nav-item .badge-nav {
-        display: none;
-      }
-      .nav-item {
-        justify-content: center;
-        padding: 10px;
-      }
-      .nav-item i {
-        margin: 0;
-        font-size: 1.1rem;
-      }
-      .nav-footer .version span {
-        display: none;
-      }
-      .nav-footer {
-        text-align: center;
-        padding: 12px 8px;
-      }
-      .main-content {
-        padding: 16px 18px;
-      }
+      .nav-side { width: 64px; padding: 0; }
+      .nav-side .logo-section .brand-text { display: none; }
+      .nav-side .logo-section { justify-content: center; padding: 16px 8px; }
+      .nav-item span { display: none; }
+      .nav-item .badge-nav { display: none; }
+      .nav-item { justify-content: center; padding: 10px; }
+      .nav-item i { margin: 0; font-size: 1.1rem; }
+      .nav-footer .version span { display: none; }
+      .nav-footer { text-align: center; padding: 12px 8px; }
+      .main-content { padding: 16px 18px; }
     }
 
     @media (max-width: 720px) {
-      .nav-side {
-        display: none;
-      }
-      .main-content {
-        padding: 12px;
-      }
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-      .stat-card {
-        padding: 14px 16px;
-      }
-      .stat-card .stat-value {
-        font-size: var(--text-lg);
-      }
-      .ribbon {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 10px 12px;
-      }
-      .ribbon-group {
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 6px;
-        padding-right: 0;
-        flex-wrap: wrap;
-      }
-      .ribbon-group:last-child {
-        border-bottom: none;
-      }
-      .search-bar {
-        flex-direction: column;
-      }
-      .search-bar .search-box {
-        width: 100%;
-      }
-      .top-bar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .top-bar .actions {
-        flex-wrap: wrap;
-      }
-      .modal-body {
-        padding: 16px 18px 24px 18px;
-      }
-      .modal-header {
-        padding: 16px 18px;
-      }
-      .modal-body .steps-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-      .app-footer {
-        flex-direction: column;
-        align-items: stretch;
-        text-align: center;
-      }
-      .app-footer .footer-left {
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-      .app-footer .footer-right {
-        justify-content: center;
-      }
-      .tab-btn {
-        font-size: var(--text-xs);
-        padding: 8px 12px;
-      }
-      .tab-btn .tab-icon {
-        font-size: 0.8rem;
-      }
+      .nav-side { display: none; }
+      .main-content { padding: 12px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .stat-card { padding: 14px 16px; }
+      .stat-card .stat-value { font-size: var(--text-lg); }
+      .ribbon { flex-direction: column; align-items: stretch; padding: 10px 12px; }
+      .ribbon-group { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 6px; padding-right: 0; flex-wrap: wrap; }
+      .ribbon-group:last-child { border-bottom: none; }
+      .search-bar { flex-direction: column; }
+      .search-bar .search-box { width: 100%; }
+      .top-bar { flex-direction: column; align-items: stretch; }
+      .top-bar .actions { flex-wrap: wrap; }
+      .modal-body { padding: 16px 18px 24px 18px; }
+      .modal-header { padding: 16px 18px; }
+      .modal-body .steps-grid { grid-template-columns: 1fr 1fr; }
+      .app-footer { flex-direction: column; align-items: stretch; text-align: center; }
+      .app-footer .footer-left { justify-content: center; flex-wrap: wrap; }
+      .app-footer .footer-right { justify-content: center; }
+      .tab-btn { font-size: var(--text-xs); padding: 8px 12px; }
+      .tab-btn .tab-icon { font-size: 0.8rem; }
+      .delete-modal-content { margin: 20px; }
+      .save-location-bar { flex-direction: column; align-items: stretch; }
     }
 
     @media (max-width: 480px) {
-      .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-      .modal-body .steps-grid {
-        grid-template-columns: 1fr;
-      }
-      .filter-chips {
-        gap: 4px;
-      }
-      .filter-chip {
-        padding: 4px 10px;
-        font-size: 0.6rem;
-      }
-      .ribbon-btn {
-        padding: 4px 10px;
-        font-size: var(--text-xs);
-      }
-      .tab-nav {
-        flex-direction: column;
-      }
-      .tab-btn {
-        justify-content: center;
-      }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .modal-body .steps-grid { grid-template-columns: 1fr; }
+      .filter-chips { gap: 4px; }
+      .filter-chip { padding: 4px 10px; font-size: 0.6rem; }
+      .ribbon-btn { padding: 4px 10px; font-size: var(--text-xs); }
+      .tab-nav { flex-direction: column; }
+      .tab-btn { justify-content: center; }
+      .delete-modal-body .btn-group { flex-direction: column; }
+      .delete-modal-body .btn-group .btn-cancel,
+      .delete-modal-body .btn-group .btn-delete { justify-content: center; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
@@ -1510,7 +1006,7 @@
     <div class="nav-footer">
       <div class="version">
         <i class="fas fa-tag"></i>
-        <span>DS 0508.01</span>
+        <span>DS 0708.02</span>
       </div>
     </div>
   </nav>
@@ -1534,36 +1030,63 @@
       </div>
     </div>
 
+    <!-- ===== SAVE LOCATION SETTINGS ===== -->
+    <div class="save-location-bar" id="saveLocationBar">
+      <div class="location-label">
+        <i class="fas fa-folder-open"></i> Save Location:
+      </div>
+      <div class="location-path" id="locationPath">
+        <span class="hint-text"><i class="fas fa-info-circle"></i> Click "Choose Folder" or use "Save As" dialog</span>
+      </div>
+      <button class="btn-location" id="chooseLocationBtn">
+        <i class="fas fa-folder"></i> Choose Folder
+      </button>
+      <span class="location-status active" id="locationStatus">
+        <i class="fas fa-check-circle"></i> Ready
+      </span>
+    </div>
+
+    <!-- ===== SECURITY DISCLAIMER BANNER ===== -->
+    <div class="security-banner">
+      <div class="shield-icon"><i class="fas fa-shield-halved"></i></div>
+      <div class="banner-content">
+        <div class="banner-title">
+          <i class="fas fa-lock"></i> Your Data Stays on Your Computer – Always
+        </div>
+        <div class="banner-text">
+          <strong>🔒 100% Local Processing:</strong> All files are processed entirely in your browser. 
+          <strong>No data is ever uploaded</strong> to any server or stored in the cloud. 
+          Your contract notes remain <strong>completely private and secure</strong> on your own device. 
+          When you export, you'll be prompted to choose where to save the file.
+        </div>
+      </div>
+      <div class="banner-badge">
+        <i class="fas fa-check-circle"></i> Zero Data Upload
+      </div>
+    </div>
+
     <!-- Stats Dashboard -->
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card grad-blue">
-        <div class="stat-top">
-          <span class="stat-icon">📄</span>
-        </div>
+        <div class="stat-top"><span class="stat-icon">📄</span></div>
         <div class="stat-label">Files</div>
         <div class="stat-value" id="statFiles">0</div>
         <div class="stat-trend" id="statFilesTrend">—</div>
       </div>
       <div class="stat-card grad-emerald">
-        <div class="stat-top">
-          <span class="stat-icon">📊</span>
-        </div>
+        <div class="stat-top"><span class="stat-icon">📊</span></div>
         <div class="stat-label">Total Trades</div>
         <div class="stat-value" id="statTrades">0</div>
         <div class="stat-trend" id="statTradesTrend">—</div>
       </div>
       <div class="stat-card grad-amber">
-        <div class="stat-top">
-          <span class="stat-icon">👤</span>
-        </div>
+        <div class="stat-top"><span class="stat-icon">👤</span></div>
         <div class="stat-label">Clients</div>
         <div class="stat-value" id="statClients">0</div>
         <div class="stat-trend" id="statClientsTrend">—</div>
       </div>
       <div class="stat-card grad-purple">
-        <div class="stat-top">
-          <span class="stat-icon">📈</span>
-        </div>
+        <div class="stat-top"><span class="stat-icon">📈</span></div>
         <div class="stat-label">F&O Trades</div>
         <div class="stat-value" id="statFno">0</div>
         <div class="stat-trend" id="statFnoTrend">—</div>
@@ -1612,6 +1135,7 @@
           <span class="group-label">File</span>
           <button class="ribbon-btn primary" id="selectFilesBtnEquity"><i class="fas fa-folder-open"></i> Import</button>
           <button class="ribbon-btn danger" id="clearBtnEquity"><i class="fas fa-trash"></i> Clear</button>
+          <button class="ribbon-btn danger" id="deleteContractBtnEquity"><i class="fas fa-trash-can"></i> Delete Contract</button>
         </div>
         <div class="ribbon-group">
           <span class="group-label">Parse</span>
@@ -1709,6 +1233,7 @@
           <button class="ribbon-btn primary" id="selectFilesBtnFno"><i class="fas fa-folder-open"></i> Select Files</button>
           <button class="ribbon-btn success" id="importBtnFno"><i class="fas fa-play"></i> Import F&O</button>
           <button class="ribbon-btn danger" id="clearBtnFno"><i class="fas fa-trash"></i> Clear</button>
+          <button class="ribbon-btn danger" id="deleteContractBtnFno"><i class="fas fa-trash-can"></i> Delete Contract</button>
         </div>
         <div class="ribbon-group">
           <span class="group-label">Export</span>
@@ -1801,6 +1326,7 @@
           <button class="ribbon-btn primary" id="selectFilesBtnMotilal"><i class="fas fa-folder-open"></i> Select Files</button>
           <button class="ribbon-btn success" id="importBtnMotilal"><i class="fas fa-play"></i> Import Motilal Oswal</button>
           <button class="ribbon-btn danger" id="clearBtnMotilal"><i class="fas fa-trash"></i> Clear</button>
+          <button class="ribbon-btn danger" id="deleteContractBtnMotilal"><i class="fas fa-trash-can"></i> Delete Contract</button>
         </div>
         <div class="ribbon-group">
           <span class="group-label">Export</span>
@@ -1870,6 +1396,46 @@
       </div>
     </div>
 
+    <!-- ===== DELETE MODAL ===== -->
+    <div class="delete-modal-overlay" id="deleteModal">
+      <div class="delete-modal-content">
+        <div class="delete-modal-header">
+          <h3><i class="fas fa-trash-can"></i> Delete Contract Note</h3>
+          <button class="modal-close" id="deleteModalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="delete-modal-body">
+          <div class="contract-info" id="deleteContractInfo">
+            <div class="info-row">
+              <span class="label">Contract Note:</span>
+              <span class="value" id="deleteContractNumber">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Party Code:</span>
+              <span class="value" id="deletePartyCode">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Client Name:</span>
+              <span class="value" id="deleteClientName">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Trade Count:</span>
+              <span class="value" id="deleteTradeCount">0</span>
+            </div>
+          </div>
+          <div class="warning-text">
+            <i class="fas fa-triangle-exclamation"></i>
+            This will permanently delete all trades under this contract note. This action cannot be undone.
+          </div>
+          <div class="btn-group">
+            <button class="btn-cancel" id="deleteCancelBtn">Cancel</button>
+            <button class="btn-delete" id="deleteConfirmBtn">
+              <i class="fas fa-trash-can"></i> Delete Contract
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <div class="app-footer">
       <div class="footer-left">
@@ -1883,7 +1449,7 @@
       <div class="footer-right">
         <span><i class="fas fa-memory"></i> <span id="footerMemory">0 MB</span></span>
         <span>|</span>
-        <span>DS 0508.01</span>
+        <span>DS 0708.02</span>
         <span>|</span>
         <span>Developed by <a href="mailto:Vikramchhajer@gmail.com">Vikram Chhajer</a></span>
       </div>
@@ -1906,6 +1472,31 @@
           <span class="tag tag-purple">Anand Rathi F&O</span> - Futures & Options trades
           <span class="tag tag-green">Motilal Oswal</span> - Motilal Oswal equity trades
         </div>
+
+        <h3><i class="fas fa-folder-open"></i> Save Location</h3>
+        <p>When you export a file, your browser will show the <strong>"Save As" dialog</strong> where you can choose any folder on your computer (like <code>D:\out\</code>). The "Choose Folder" button helps remember the last folder you used for convenience.</p>
+
+        <h3><i class="fas fa-lock"></i> Data Privacy & Security</h3>
+        <div class="highlight-box" style="border-left-color: #059669; background: #ECFDF5;">
+          <strong>🔒 Your data is completely safe:</strong>
+          <ul>
+            <li><strong>100% Local Processing</strong> - All data stays in your browser</li>
+            <li><strong>No Uploads</strong> - Files are never sent to any server</li>
+            <li><strong>No Cloud Storage</strong> - Your data never leaves your computer</li>
+            <li><strong>Zero Third-Party Access</strong> - No one else can see your data</li>
+            <li><strong>GDPR Compliant</strong> - Full control over your data</li>
+          </ul>
+        </div>
+
+        <h3><i class="fas fa-trash-can"></i> Delete Contract Note</h3>
+        <p>To delete a specific contract note:</p>
+        <ul>
+          <li>Click the <strong>"Delete Contract"</strong> button in the toolbar</li>
+          <li>Enter the <strong>Contract Note Number</strong> you want to delete</li>
+          <li>Review the contract details in the confirmation dialog</li>
+          <li>Click <strong>"Delete Contract"</strong> to permanently remove all trades under that contract note</li>
+        </ul>
+
         <h3><i class="fas fa-rocket"></i> How to Use</h3>
         <div class="steps-grid">
           <div class="step-item">
@@ -1926,12 +1517,12 @@
           <div class="step-item">
             <span class="step-icon">📊</span>
             <div class="step-num">4</div>
-            <p>Export to <strong>Excel</strong> or <strong>CSV</strong></p>
+            <p>Export to <strong>Excel</strong> or <strong>CSV</strong> - choose where to save</p>
           </div>
         </div>
         <p style="margin-top:16px;font-size:0.85rem;color:var(--text-secondary);text-align:center;border-top:1px solid var(--border);padding-top:16px;">
           <i class="fas fa-code"></i> Developed by <strong>Vikram Chhajer</strong> &nbsp;·&nbsp;
-          <i class="fas fa-tag"></i> Version DS 0508.01
+          <i class="fas fa-tag"></i> Version DS 0708.02
         </p>
       </div>
     </div>
@@ -1946,6 +1537,225 @@
   <script>
     (function() {
       "use strict";
+
+      // ---------- SAVE LOCATION WITH FILE SYSTEM ACCESS API ----------
+      const STORAGE_KEY = 'equitynote_save_folder_handle';
+      let saveFolderHandle = null;
+      let saveFolderName = '';
+
+      // Try to restore saved folder handle
+      async function restoreSavedFolder() {
+        try {
+          const savedData = localStorage.getItem(STORAGE_KEY);
+          if (savedData) {
+            const data = JSON.parse(savedData);
+            // Check if the handle is still valid (permission)
+            if (data && data.handle) {
+              // We can't restore the actual handle from JSON, but we can store the name
+              saveFolderName = data.name || '';
+              if (saveFolderName) {
+                document.getElementById('locationPath').innerHTML = `
+                  <span class="folder-icon">📁</span>
+                  <span class="path-text">${saveFolderName}</span>
+                  <span class="hint-text"> (click Export to choose where to save)</span>
+                `;
+                document.getElementById('locationStatus').className = 'location-status active';
+                document.getElementById('locationStatus').innerHTML = '<i class="fas fa-check-circle"></i> Ready';
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Could not restore folder:', e);
+        }
+      }
+
+      // Initialize
+      restoreSavedFolder();
+
+      // ---------- CHOOSE FOLDER ----------
+      document.getElementById('chooseLocationBtn').addEventListener('click', async function() {
+        try {
+          // Check if the File System Access API is supported
+          if ('showDirectoryPicker' in window) {
+            // Show folder picker dialog
+            const dirHandle = await window.showDirectoryPicker({
+                mode: 'readwrite'
+            });
+            
+            // Check if we have write permission
+            const permission = await dirHandle.requestPermission({ mode: 'readwrite' });
+            if (permission === 'granted') {
+              saveFolderHandle = dirHandle;
+              saveFolderName = dirHandle.name;
+              
+              // Save the folder name for display (can't save the actual handle in localStorage)
+              localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                name: saveFolderName,
+                timestamp: Date.now()
+              }));
+              
+              document.getElementById('locationPath').innerHTML = `
+                <span class="folder-icon">📁</span>
+                <span class="path-text">${saveFolderName}</span>
+                <span class="hint-text"> ✅ Folder selected</span>
+              `;
+              document.getElementById('locationStatus').className = 'location-status active';
+              document.getElementById('locationStatus').innerHTML = '<i class="fas fa-check-circle"></i> Ready';
+              
+              showToast('📁 Folder Selected', `Files will save to: ${saveFolderName}`, 'success');
+            } else {
+              showToast('⚠️ Permission Denied', 'Please grant permission to use this folder.', 'warning');
+            }
+          } else {
+            // Fallback for browsers that don't support the File System Access API
+            showToast('ℹ️ Browser Support', 
+              'Your browser doesn\'t support folder selection. When you export, use the "Save As" dialog to choose any folder.', 
+              'info'
+            );
+            // Show a helpful message
+            document.getElementById('locationPath').innerHTML = `
+              <span class="hint-text"><i class="fas fa-info-circle"></i> Use "Save As" dialog to choose any folder</span>
+            `;
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Folder selection error:', err);
+            showToast('⚠️ Error', 'Could not select folder. Use "Save As" dialog instead.', 'warning');
+          }
+        }
+      });
+
+      // ---------- CUSTOM SAVE FUNCTION ----------
+      const originalSaveAs = window.saveAs;
+      
+      window.saveAs = async function(blob, filename) {
+        try {
+          // Check if we have a selected folder and the API is supported
+          if (saveFolderHandle && 'showDirectoryPicker' in window) {
+            try {
+              // Verify permission is still valid
+              const permission = await saveFolderHandle.requestPermission({ mode: 'readwrite' });
+              if (permission === 'granted') {
+                // Create a new file in the selected folder
+                const fileHandle = await saveFolderHandle.getFileHandle(filename, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                
+                showToast('✅ File Saved', `Saved to: ${saveFolderName}\\${filename}`, 'success');
+                return;
+              }
+            } catch (err) {
+              console.warn('Folder save failed, falling back to Save As dialog:', err);
+              // If there's an error, fall back to the standard Save As dialog
+            }
+          }
+          
+          // Fallback: Use FileSaver.js which shows the "Save As" dialog
+          // User can navigate to any folder they want (D:\out\, etc.)
+          originalSaveAs(blob, filename);
+          showToast('💾 File Saved', `File saved via "Save As" dialog. You chose the location.`, 'success');
+          
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Save failed:', err);
+            showToast('❌ Save Failed', 'Could not save the file. Please try again.', 'error');
+          }
+        }
+      };
+
+      // ---------- DELETE CONTRACT NOTE LOGIC ----------
+      let deleteTarget = null;
+      let deleteTargetTab = null;
+
+      function openDeleteModal(rows, tab, rowData) {
+        if (!rowData || !rowData.ContractNote) {
+          showToast('⚠️ No Contract Selected', 'Please click on a contract note row first.', 'error');
+          return;
+        }
+
+        const contractRows = rows.filter(r => 
+          !r.isSeparator && r.ContractNote === rowData.ContractNote && r.PartyCode === rowData.PartyCode
+        );
+
+        if (contractRows.length === 0) {
+          showToast('⚠️ No Trades Found', 'No trades found for this contract note.', 'error');
+          return;
+        }
+
+        deleteTarget = {
+          contractNote: rowData.ContractNote,
+          partyCode: rowData.PartyCode,
+          clientName: rowData.ClientName || rowData.PartyCode,
+          rows: contractRows,
+          count: contractRows.length
+        };
+        deleteTargetTab = tab;
+
+        document.getElementById('deleteContractNumber').textContent = rowData.ContractNote;
+        document.getElementById('deletePartyCode').textContent = rowData.PartyCode;
+        document.getElementById('deleteClientName').textContent = rowData.ClientName || rowData.PartyCode || '—';
+        document.getElementById('deleteTradeCount').textContent = contractRows.length;
+
+        document.getElementById('deleteModal').classList.add('active');
+      }
+
+      function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('active');
+        deleteTarget = null;
+        deleteTargetTab = null;
+      }
+
+      function confirmDelete() {
+        if (!deleteTarget || !deleteTargetTab) return;
+
+        const tab = deleteTargetTab;
+        const target = deleteTarget;
+
+        let removedCount = 0;
+
+        if (tab === 'equity') {
+          const filtered = equityRows.filter(r => {
+            if (r.isSeparator) return true;
+            if (r.ContractNote === target.contractNote && r.PartyCode === target.partyCode) {
+              removedCount++;
+              return false;
+            }
+            return true;
+          });
+          equityRows = processWithBoundaries(filtered);
+          equityFiltered = equityRows;
+          renderEquityTable(equityFiltered);
+        } else if (tab === 'fno') {
+          const filtered = fnoRows.filter(r => {
+            if (r.isSeparator) return true;
+            if (r.ContractNote === target.contractNote && r.PartyCode === target.partyCode) {
+              removedCount++;
+              return false;
+            }
+            return true;
+          });
+          fnoRows = processWithBoundaries(filtered);
+          fnoFiltered = fnoRows;
+          renderFnoTable(fnoFiltered);
+        } else if (tab === 'motilal') {
+          const filtered = motilalRows.filter(r => {
+            if (r.isSeparator) return true;
+            if (r.ContractNote === target.contractNote && r.PartyCode === target.partyCode) {
+              removedCount++;
+              return false;
+            }
+            return true;
+          });
+          motilalRows = processWithBoundaries(filtered);
+          motilalFiltered = motilalRows;
+          renderMotilalTable(motilalFiltered);
+        }
+
+        updateAllStats();
+        closeDeleteModal();
+        showToast('🗑️ Contract Deleted', `Contract ${target.contractNote} with ${removedCount} trades removed.`, 'success');
+      }
 
       // ---------- STATE ----------
       let equityFiles = [];
@@ -1973,6 +1783,7 @@
       const exportExcelBtnEquity = document.getElementById('exportExcelBtnEquity');
       const exportCsvBtnEquity = document.getElementById('exportCsvBtnEquity');
       const clearBtnEquity = document.getElementById('clearBtnEquity');
+      const deleteContractBtnEquity = document.getElementById('deleteContractBtnEquity');
       const helpBtnEquity = document.getElementById('helpBtnEquity');
       const searchInputEquity = document.getElementById('searchInputEquity');
       const dropZoneEquity = document.getElementById('dropZoneEquity');
@@ -1989,6 +1800,7 @@
       const exportExcelBtnFno = document.getElementById('exportExcelBtnFno');
       const exportCsvBtnFno = document.getElementById('exportCsvBtnFno');
       const clearBtnFno = document.getElementById('clearBtnFno');
+      const deleteContractBtnFno = document.getElementById('deleteContractBtnFno');
       const helpBtnFno = document.getElementById('helpBtnFno');
       const searchInputFno = document.getElementById('searchInputFno');
       const dropZoneFno = document.getElementById('dropZoneFno');
@@ -2005,6 +1817,7 @@
       const exportExcelBtnMotilal = document.getElementById('exportExcelBtnMotilal');
       const exportCsvBtnMotilal = document.getElementById('exportCsvBtnMotilal');
       const clearBtnMotilal = document.getElementById('clearBtnMotilal');
+      const deleteContractBtnMotilal = document.getElementById('deleteContractBtnMotilal');
       const helpBtnMotilal = document.getElementById('helpBtnMotilal');
       const searchInputMotilal = document.getElementById('searchInputMotilal');
       const dropZoneMotilal = document.getElementById('dropZoneMotilal');
@@ -2013,6 +1826,12 @@
       const progressFillMotilal = document.getElementById('progressFillMotilal');
       const progressTextMotilal = document.getElementById('progressTextMotilal');
       const progressPercentMotilal = document.getElementById('progressPercentMotilal');
+
+      // Delete Modal
+      const deleteModal = document.getElementById('deleteModal');
+      const deleteModalClose = document.getElementById('deleteModalClose');
+      const deleteCancelBtn = document.getElementById('deleteCancelBtn');
+      const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
 
       // Stats
       const statFiles = document.getElementById('statFiles');
@@ -2023,18 +1842,73 @@
       const fnoBadge = document.getElementById('fnoBadge');
       const motilalBadge = document.getElementById('motilalBadge');
 
+      // ---------- DELETE MODAL EVENTS ----------
+      deleteModalClose.addEventListener('click', closeDeleteModal);
+      deleteCancelBtn.addEventListener('click', closeDeleteModal);
+      deleteConfirmBtn.addEventListener('click', confirmDelete);
+      deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) closeDeleteModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDeleteModal();
+      });
+
+      // ---------- DELETE CONTRACT BUTTONS ----------
+      [deleteContractBtnEquity, deleteContractBtnFno, deleteContractBtnMotilal].forEach((btn, idx) => {
+        btn.addEventListener('click', function() {
+          const tabs = ['equity', 'fno', 'motilal'];
+          const tab = tabs[idx];
+          const rows = tab === 'equity' ? equityRows : (tab === 'fno' ? fnoRows : motilalRows);
+          const dataRows = rows.filter(r => !r.isSeparator);
+
+          if (dataRows.length === 0) {
+            showToast('⚠️ No Data', 'No contract notes to delete. Import data first.', 'error');
+            return;
+          }
+
+          const contractNotes = [...new Set(dataRows.map(r => r.ContractNote).filter(Boolean))];
+          const noteList = contractNotes.join(', ');
+          
+          const contractInput = prompt(
+            `Enter the Contract Note number to delete:\n\nAvailable Contract Notes:\n${noteList}\n\nType the exact contract note number:`
+          );
+
+          if (contractInput === null) return;
+
+          const targetContract = contractInput.trim();
+          if (!targetContract) {
+            showToast('⚠️ No Input', 'Please enter a valid contract note number.', 'error');
+            return;
+          }
+
+          const targetRows = dataRows.filter(r => r.ContractNote === targetContract);
+          if (targetRows.length === 0) {
+            showToast('⚠️ Not Found', `Contract note "${targetContract}" not found.`, 'error');
+            return;
+          }
+
+          const firstRow = targetRows[0];
+          openDeleteModal(rows, tab, firstRow);
+        });
+      });
+
       // ---------- TAB SWITCHING ----------
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
           document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-          document.getElementById('tab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1))
-            .classList.add('active');
+          const tabMap = {
+            'equity': 'Equity',
+            'fno': 'Fno',
+            'motilal': 'Motilal'
+          };
+          const tabName = tabMap[this.dataset.tab] || this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1);
+          document.getElementById('tab' + tabName).classList.add('active');
         });
       });
 
-      // ---------- EQUITY HELPERS (Anand Rathi) ----------
+      // ---------- EQUITY HELPERS ----------
       function isNumericToken(tok) {
         let t = (tok || '').trim().replace(/,/g, '');
         if (t.startsWith('(') && t.endsWith(')')) t = '-' + t.slice(1, -1);
@@ -2130,7 +2004,7 @@
         };
       }
 
-      // ---------- EQUITY PARSER (Anand Rathi) ----------
+      // ---------- EQUITY PARSER ----------
       function parseEquityFile(text, fileName) {
         text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         const lines = text.split('\n');
@@ -2384,7 +2258,7 @@
         return rows;
       }
 
-      // ---------- BOUNDARY SEPARATORS (shared) ----------
+      // ---------- BOUNDARY SEPARATORS ----------
       function processWithBoundaries(rows) {
         if (rows.length === 0) return rows;
         let result = [];
@@ -2544,7 +2418,7 @@
         tableBodyEquity.innerHTML = html;
       }
 
-      // ---------- F&O PARSER (Anand Rathi) ----------
+      // ---------- F&O PARSER ----------
       function extractPartyCode(text) {
         const lines = text.split(/\r?\n/);
         for (let line of lines) {
@@ -2998,7 +2872,6 @@
         let currentISIN = '';
         let pendingTrades = [];
 
-        // Extract Contract Note
         for (let line of lines) {
           if (line.includes('Contract Note') && !contractNote) {
             const match = line.match(/Contract Note\s*(\d+)/i);
@@ -3006,7 +2879,6 @@
           }
         }
 
-        // Extract Settlement
         for (let line of lines) {
           if (line.includes('Settlement No') && !settlement) {
             const match = line.match(/Settlement No\.?\s*([\d]+\s*-\s*[\w]+\s*-\s*[\w]+)/i);
@@ -3018,7 +2890,6 @@
           }
         }
 
-        // Extract Trade Date
         for (let line of lines) {
           if (line.includes('Trade Date') && !tradeDate) {
             const match = line.match(/Trade Date\s*([\d]{1,2}\s+[A-Za-z]+\s+[\d]{2,4})/i);
@@ -3037,7 +2908,6 @@
           }
         }
 
-        // Extract Client Name and PartyCode
         for (let line of lines) {
           if (line.includes('Client Name') && !clientName) {
             const match = line.match(/Client Name\s*([^(]+)(?:\(([^)]+)\))?/i);
@@ -3052,12 +2922,10 @@
           }
         }
 
-        // Process lines for trades
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          // Extract ISIN
           if (line.includes('ISIN:')) {
             const newISIN = line.match(/ISIN:\s*([A-Z0-9]{10,12})/i);
             if (newISIN) {
@@ -3068,13 +2936,11 @@
             }
           }
 
-          // Extract Exchange
           if (!exchange) {
             if (line.includes('-BSE')) exchange = 'BSE';
             else if (line.includes('-NSE')) exchange = 'NSE';
           }
 
-          // Detect Trade Lines
           const trimmed = line.trim();
           if (trimmed.length >= 15 && /^\d/.test(trimmed) &&
             (/\sB\s|\sS\s/.test(trimmed) || / B$/.test(trimmed) || / S$/.test(trimmed))) {
@@ -3082,7 +2948,6 @@
             const tokens = splitClean(trimmed);
             if (tokens.length < 4) continue;
 
-            // Find B/S position
             let bsPos = -1;
             for (let j = 3; j < tokens.length; j++) {
               if (tokens[j] === 'B' || tokens[j] === 'S') {
@@ -3092,7 +2957,6 @@
             }
             if (bsPos === -1) continue;
 
-            // Find exchange position
             let exchangePos = -1;
             for (let j = 0; j < tokens.length; j++) {
               if (tokens[j] === '-BSE' || tokens[j] === '-NSE') {
@@ -3107,7 +2971,6 @@
             const tradeTime = tokens[1] || '';
             const tradeNo = tokens[2] || '';
 
-            // Extract scrip name
             let scripName = '';
             const startPos = 4;
             const endPos = exchangePos > 0 ? exchangePos : bsPos;
@@ -3122,13 +2985,11 @@
 
             const bs = tokens[bsPos] === 'B' ? 'BUY' : (tokens[bsPos] === 'S' ? 'SELL' : '');
 
-            // Extract quantity (remove D suffix)
             let qty = '';
             if (bsPos + 1 < tokens.length) {
               qty = tokens[bsPos + 1].replace(/D$/, '');
             }
 
-            // Extract rate
             let rate = '';
             for (let j = bsPos + 2; j < tokens.length; j++) {
               if (isNumericToken(tokens[j]) && tokens[j].includes('.')) {
@@ -3137,7 +2998,6 @@
               }
             }
 
-            // Extract brokerage
             let brokerage = '0';
             let count = 0;
             for (let j = bsPos + 2; j < tokens.length; j++) {
@@ -3150,7 +3010,6 @@
               }
             }
 
-            // Extract market amount
             let marketAmount = '';
             for (let j = tokens.length - 1; j >= 0; j--) {
               if (isNumericToken(tokens[j])) {
@@ -3187,7 +3046,6 @@
           }
         }
 
-        // Apply boundary separators
         let result = [];
         let lastParty = '';
         let lastContract = '';
@@ -3419,7 +3277,8 @@
         const iconMap = {
           success: 'fa-circle-check',
           error: 'fa-circle-exclamation',
-          info: 'fa-circle-info'
+          info: 'fa-circle-info',
+          warning: 'fa-triangle-exclamation'
         };
         toast.innerHTML = `
           <div class="toast-icon"><i class="fas ${iconMap[type] || iconMap.info}"></i></div>
@@ -3575,9 +3434,9 @@
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-        saveAs(blob, `AnandRathi_Equity_${dateStr}.xlsx`);
+        const filename = `AnandRathi_Equity_${dateStr}.xlsx`;
+        window.saveAs(blob, filename);
         showProgressEquity(100, 'Done!', 'step4');
-        showToast('✅ Excel Exported', `${dataRows.length} equity rows exported.`, 'success');
       }
 
       function exportEquityCsv() {
@@ -3612,15 +3471,9 @@
         }
 
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
         const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-        a.download = `AnandRathi_Equity_${dateStr}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const filename = `AnandRathi_Equity_${dateStr}.csv`;
+        window.saveAs(blob, filename);
         showToast('✅ CSV Exported', `${dataRows.length} equity rows exported.`, 'success');
       }
 
@@ -3711,9 +3564,9 @@
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-        saveAs(blob, `AnandRathi_FNO_${dateStr}.xlsx`);
+        const filename = `AnandRathi_FNO_${dateStr}.xlsx`;
+        window.saveAs(blob, filename);
         showProgressFno(100, 'Done!', 'step4');
-        showToast('✅ Excel Exported', `${dataRows.length} F&O rows exported with separators.`, 'success');
       }
 
       function exportFnoCsv() {
@@ -3750,15 +3603,9 @@
         }
 
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
         const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-        a.download = `AnandRathi_FNO_${dateStr}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const filename = `AnandRathi_FNO_${dateStr}.csv`;
+        window.saveAs(blob, filename);
         showToast('✅ CSV Exported', `${dataRows.length} F&O rows exported.`, 'success');
       }
 
@@ -3848,9 +3695,9 @@
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-        saveAs(blob, `MotilalOswal_${dateStr}.xlsx`);
+        const filename = `MotilalOswal_${dateStr}.xlsx`;
+        window.saveAs(blob, filename);
         showProgressMotilal(100, 'Done!', 'step4');
-        showToast('✅ Excel Exported', `${dataRows.length} Motilal Oswal rows exported with separators.`, 'success');
       }
 
       function exportMotilalCsv() {
@@ -3885,15 +3732,9 @@
         }
 
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
         const dateStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-        a.download = `MotilalOswal_${dateStr}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const filename = `MotilalOswal_${dateStr}.csv`;
+        window.saveAs(blob, filename);
         showToast('✅ CSV Exported', `${dataRows.length} Motilal Oswal rows exported.`, 'success');
       }
 
@@ -4182,9 +4023,9 @@
           } else if (page === 'export') {
             showToast('Export Options', 'Use the Excel or CSV buttons in the active tab.', 'info');
           } else if (page === 'settings') {
-            showToast('Settings', 'Theme toggle is in the top-right corner.', 'info');
+            showToast('Settings', 'Theme toggle and save location are available.', 'info');
           } else if (page === 'about') {
-            showToast('About', 'EquityNote Master vDS 0508.01. Developed by Vikram Chhajer.', 'info');
+            showToast('About', 'EquityNote Master vDS 0708.02. Developed by Vikram Chhajer.', 'info');
           } else if (page === 'help') {
             openHelp();
           }
@@ -4194,7 +4035,6 @@
       // ---------- INIT ----------
       updateAllStats();
 
-      // Auto-show help on first visit
       if (!sessionStorage.getItem('helpShown')) {
         setTimeout(() => {
           openHelp();
@@ -4202,9 +4042,33 @@
         }, 600);
       }
 
-      // Global drag/drop
       document.addEventListener('dragover', (e) => e.preventDefault());
       document.addEventListener('drop', (e) => e.preventDefault());
+
+      // Check browser support for File System Access API
+      if (!('showDirectoryPicker' in window)) {
+        // Show a friendly message for browsers that don't support folder selection
+        document.getElementById('locationPath').innerHTML = `
+          <span class="hint-text"><i class="fas fa-info-circle"></i> Use "Save As" dialog to choose any folder (D:\out\, etc.)</span>
+        `;
+        document.getElementById('locationStatus').className = 'location-status info';
+        document.getElementById('locationStatus').innerHTML = '<i class="fas fa-info-circle"></i> Browser: Use Save As';
+      } else {
+        // Check if we have a stored folder name
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          try {
+            const data = JSON.parse(savedData);
+            if (data && data.name) {
+              document.getElementById('locationPath').innerHTML = `
+                <span class="folder-icon">📁</span>
+                <span class="path-text">${data.name}</span>
+                <span class="hint-text"> ✅ Click Export to save</span>
+              `;
+            }
+          } catch (e) {}
+        }
+      }
 
     })();
   </script>
